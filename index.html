@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>FAUNWILD — an original Kin adventure</title>
+<meta name="description" content="FAUNWILD: a community-built, Game Boy Color-style monster-keeping RPG in a single HTML file. Snare wild Kin, beat two gyms, chase a night-walking legend. No downloads, no dependencies.">
+<meta name="theme-color" content="#0c0c14">
+<meta property="og:title" content="FAUNWILD — an original Kin adventure">
+<meta property="og:description" content="A community-built, Game Boy Color-style monster-keeping RPG in a single HTML file. Play it right in your browser.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230c0c14'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%239fe6b8'/%3E%3Crect x='9' y='3' width='4' height='4' fill='%239fe6b8'/%3E%3Crect x='4' y='8' width='8' height='5' fill='%23e6c95e'/%3E%3C/svg%3E">
+<style>
+html,body{margin:0;padding:0;height:100%;color:#aeb4c8;font-family:ui-monospace,Menlo,Consolas,monospace;overflow:hidden;
+ background:#0c0c14;background:radial-gradient(ellipse at 50% 38%,#141422 0%,#0c0c14 70%);
+ -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px}
+#brand{font-size:15px;font-weight:bold;letter-spacing:.34em;color:#e6c95e;text-shadow:0 2px 10px rgba(230,201,94,.25)}
+#brand small{display:block;font-size:9px;font-weight:normal;letter-spacing:.18em;color:#5b6178;margin-top:3px;text-align:center}
+#foot{font-size:10px;letter-spacing:.06em;color:#454a60}
+#foot a{color:#6b7290;text-decoration:none;border-bottom:1px dotted #3c3c5e}
+#foot a:hover{color:#9fe6b8}
+#cv{image-rendering:pixelated;image-rendering:crisp-edges;background:#000;border:3px solid #23233a;border-radius:6px;
+ box-shadow:0 0 0 1px #000,0 14px 50px rgba(0,0,0,.6)}
+#hint{font-size:11px;letter-spacing:.08em;color:#5b6178}
+#pads{display:none;width:100%;max-width:480px;justify-content:space-between;align-items:center;
+ padding:4px 16px 18px;box-sizing:border-box;touch-action:none}
+.dpad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}
+.pbtn{background:#1d1d30;border:2px solid #3c3c5e;border-radius:10px;color:#9aa1bd;font:inherit;font-size:17px;
+ display:flex;align-items:center;justify-content:center;margin:1px;padding:0}
+.pbtn.on{background:#3a3a60;color:#e8eaf4}
+.ab{width:56px;height:56px;border-radius:50%;font-size:19px;font-weight:bold}
+.abwrap{display:flex;gap:12px;align-items:flex-end}
+.ab[data-k=b]{margin-top:26px}
+.start{width:62px;height:28px;border-radius:14px;font-size:10px;letter-spacing:.1em}
+@media (hover:none) and (pointer:coarse){#pads{display:flex}#hint{display:none}#foot{display:none}#brand small{display:none}}
+#io{display:none;position:fixed;inset:0;background:rgba(5,5,12,.88);z-index:9;
+ align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:16px;box-sizing:border-box}
+#io .box{background:#15152a;border:2px solid #3c3c5e;border-radius:10px;padding:14px;width:min(560px,94vw);
+ display:flex;flex-direction:column;gap:10px}
+#iotitle{font-size:13px;color:#e6c95e;letter-spacing:.06em}
+#iotext{width:100%;height:120px;background:#0a0a16;color:#9fe6b8;border:1px solid #34345a;border-radius:6px;
+ font:11px/1.5 ui-monospace,monospace;padding:8px;box-sizing:border-box;word-break:break-all;resize:none}
+#io button{background:#2a2a48;border:2px solid #4a4a76;color:#dfe2f0;font:inherit;font-size:12px;
+ padding:7px 16px;border-radius:8px;cursor:pointer}
+#io .row{display:flex;gap:10px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<div id="wrap">
+ <div id="brand">FAUNWILD<small>AN ORIGINAL KIN ADVENTURE</small></div>
+ <canvas id="cv" width="160" height="144"></canvas>
+ <div id="hint">MOVE: ARROWS / WASD &nbsp;&middot;&nbsp; A: Z &nbsp;&middot;&nbsp; B: X &nbsp;&middot;&nbsp; START: ENTER</div>
+ <div id="pads">
+  <div class="dpad">
+   <div></div><button class="pbtn" data-k="u">&#9650;</button><div></div>
+   <button class="pbtn" data-k="l">&#9664;</button><div></div><button class="pbtn" data-k="r">&#9654;</button>
+   <div></div><button class="pbtn" data-k="d">&#9660;</button><div></div>
+  </div>
+  <button class="pbtn start" data-k="st">START</button>
+  <div class="abwrap">
+   <button class="pbtn ab" data-k="b">B</button>
+   <button class="pbtn ab" data-k="a">A</button>
+  </div>
+ </div>
+ <div id="foot">free &amp; open source &middot; <a href="https://github.com/Meliwat/faunwild" target="_blank" rel="noopener">github.com/Meliwat/faunwild</a></div>
+</div>
+<div id="io">
+ <div class="box">
+  <div id="iotitle">SAVE CODE</div>
+  <textarea id="iotext" spellcheck="false"></textarea>
+  <div class="row"><button id="ioload">LOAD</button><button id="ioclose">CLOSE</button></div>
+ </div>
+</div>
+<script>
+/* ============================================================
+   FAUNWILD — an original monster-keeping RPG of the Solvane region
+   A single-file, Game Boy Color-era style game. All art and audio
+   are generated in code. No external assets, no borrowed creatures.
+   ============================================================ */
+'use strict';
+//------------------------------------------------------------ utils
+const W=160,H=144,TS=16;
+const fl=Math.floor;
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const ri=n=>fl(Math.random()*n);
+const ch=p=>Math.random()<p;
+const pick=a=>a[ri(a.length)];
+function wpick(tab){let s=0;for(const e of tab)s+=e[3];let r=Math.random()*s;for(const e of tab){r-=e[3];if(r<0)return e}return tab[tab.length-1]}
+function deep(o){return JSON.parse(JSON.stringify(o))}
+
+//------------------------------------------------------------ 5x7 pixel font (uppercase)
+const GL={
+A:[14,17,17,31,17,17,17],B:[30,17,17,30,17,17,30],C:[14,17,16,16,16,17,14],D:[28,18,17,17,17,18,28],
+E:[31,16,16,30,16,16,31],F:[31,16,16,30,16,16,16],G:[14,17,16,23,17,17,14],H:[17,17,17,31,17,17,17],
+I:[14,4,4,4,4,4,14],J:[7,2,2,2,2,18,12],K:[17,18,20,24,20,18,17],L:[16,16,16,16,16,16,31],
+M:[17,27,21,21,17,17,17],N:[17,25,21,19,17,17,17],O:[14,17,17,17,17,17,14],P:[30,17,17,30,16,16,16],
+Q:[14,17,17,17,21,18,13],R:[30,17,17,30,20,18,17],S:[15,16,16,14,1,1,30],T:[31,4,4,4,4,4,4],
+U:[17,17,17,17,17,17,14],V:[17,17,17,17,17,10,4],W:[17,17,17,21,21,21,10],X:[17,17,10,4,10,17,17],
+Y:[17,17,10,4,4,4,4],Z:[31,1,2,4,8,16,31],
+'0':[14,17,19,21,25,17,14],'1':[4,12,4,4,4,4,14],'2':[14,17,1,2,4,8,31],'3':[31,2,4,2,1,17,14],
+'4':[2,6,10,18,31,2,2],'5':[31,16,30,1,1,17,14],'6':[6,8,16,30,17,17,14],'7':[31,1,2,4,8,8,8],
+'8':[14,17,17,14,17,17,14],'9':[14,17,17,15,1,2,12],
+'.':[0,0,0,0,0,12,12],',':[0,0,0,0,12,4,8],'!':[4,4,4,4,4,0,4],'?':[14,17,1,2,4,0,4],
+"'":[12,4,8,0,0,0,0],'-':[0,0,0,31,0,0,0],':':[0,12,12,0,12,12,0],'/':[1,1,2,4,8,16,16],
+'(':[2,4,8,8,8,4,2],')':[8,4,2,2,2,4,8],'<':[2,4,8,16,8,4,2],'>':[8,4,2,1,2,4,8],
+'+':[0,4,4,31,4,4,0],'$':[4,15,20,14,5,30,4],'%':[25,26,2,4,8,11,19],'"':[10,10,0,0,0,0,0],
+'*':[4,21,14,31,14,21,4],'@':[0,10,31,31,14,4,0],'~':[6,5,4,4,12,28,8],';':[0,12,12,0,12,4,8],
+'=':[0,0,31,0,31,0,0],'_':[0,0,0,0,0,0,31]};
+// '*' sparkle, '@' heart, '~' music note
+
+//------------------------------------------------------------ audio
+let actx=null;
+const AUD={song:null,step:0,next:0,hold:0};
+function aInit(){try{const AC=(typeof window!=='undefined')&&(window.AudioContext||window.webkitAudioContext);
+ if(!actx&&AC)actx=new AC();
+ if(actx&&actx.state==='suspended')actx.resume()}catch(e){actx=actx||null}}
+function tone(f,t0,dur,type,vol,slide){if(!actx)return;try{const o=actx.createOscillator(),g=actx.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,slide),t0+dur);g.gain.setValueAtTime(vol||.03,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+dur);o.connect(g);g.connect(actx.destination);o.start(t0);o.stop(t0+dur+.02)}catch(e){}}
+const midi=m=>440*Math.pow(2,(m-69)/12);
+const SONGS={
+over:{spd:7,lead:[72,0,76,79,76,0,72,0,74,0,77,81,77,0,74,0,76,79,84,79,81,0,77,76,74,0,71,74,72,0,0,0],
+      bass:[48,0,55,0,52,0,55,0,50,0,57,0,53,0,57,0,48,0,55,0,53,0,57,0,43,0,50,0,48,0,48,0]},
+battle:{spd:9,lead:[69,69,0,69,72,0,69,0,67,67,0,67,71,0,67,0,69,69,0,69,72,74,76,0,77,76,74,72,71,69,68,69],
+      bass:[45,45,45,45,43,43,43,43,45,45,45,45,40,40,44,44]},
+cave:{spd:4,lead:[64,0,0,0,67,0,63,0,65,0,0,0,60,0,62,0],bass:[40,0,0,0,0,0,0,0,38,0,0,0,0,0,0,0]},
+gym:{spd:8,lead:[69,0,76,0,72,0,69,0,71,0,74,0,77,0,74,0,72,0,79,0,76,0,72,0,74,72,71,69,67,69,0,0],
+      bass:[45,0,45,0,40,0,40,0,43,0,43,0,38,0,40,0]},
+gymbattle:{spd:10,lead:[81,81,0,81,79,0,76,0,77,77,0,77,76,0,72,0,74,76,77,79,81,79,77,76,74,72,71,72,74,76,0,0],
+      bass:[45,45,52,52,40,40,47,47,43,43,50,50,41,41,43,43]}};
+function playSong(id){AUD.song=id;AUD.step=0;if(actx)AUD.next=actx.currentTime+.06}
+function stopSong(){AUD.song=null}
+function musTick(){if(!actx||!G||!G.opts.mus||!AUD.song)return;if(actx.currentTime<AUD.hold)return;const s=SONGS[AUD.song];if(!s)return;
+ while(AUD.next<actx.currentTime+.14){const i=AUD.step%s.lead.length,L=s.lead[i],B=s.bass[i%s.bass.length],dt=1/s.spd;
+  if(L)tone(midi(L),AUD.next,dt*.85,'square',.022);if(B)tone(midi(B),AUD.next,dt*.95,'triangle',.045);AUD.step++;AUD.next+=dt}}
+function jin(notes,spd,type){if(!actx||!G||!G.opts.sfx)return;let t=actx.currentTime+.02;const dt=1/(spd||8);
+ for(const n of notes){if(n)tone(midi(n),t,dt*.9,type||'square',.04);t+=dt}AUD.hold=t+.1;if(AUD.song)AUD.next=Math.max(AUD.next,t+.1)}
+function sfx(n){if(!G||!G.opts.sfx||!actx)return;const t=actx.currentTime;switch(n){
+ case 'blip':tone(900,t,.03,'square',.02);break;
+ case 'conf':tone(1100,t,.05,'square',.03);break;
+ case 'deny':tone(140,t,.09,'square',.035);break;
+ case 'bump':tone(95,t,.06,'square',.03);break;
+ case 'hit':tone(300,t,.1,'sawtooth',.05,90);break;
+ case 'hit2':tone(520,t,.12,'sawtooth',.06,70);break;
+ case 'faint':tone(420,t,.45,'square',.05,60);break;
+ case 'throw':tone(520,t,.12,'square',.03,1200);break;
+ case 'shake':tone(240,t,.06,'square',.04);break;
+ case 'click':tone(1500,t,.05,'square',.05);break;
+ case 'run':tone(800,t,.18,'square',.03,200);break;
+ case 'beep':tone(1040,t,.05,'square',.035);break;
+ case 'hop':tone(330,t,.09,'square',.03,660);break;
+ case 'heal':jin([76,79,84],10);break;
+ case 'lvl':jin([72,76,79,84],11);break;
+ case 'catch':jin([72,72,76,79,84,0,84],10);break;
+ case 'badge':jin([72,76,79,84,79,84,88],9);break;
+ case 'evo':jin([60,64,67,72,76,79,84,88],12);break;
+ case 'found':jin([84,88],12);break;
+ case 'victory':jin([79,79,79,84,0,79,84,88],9);break;
+}}
+
+//------------------------------------------------------------ types & full effectiveness table
+const TYPES=['BEAST','EMBER','TIDE','FLORA','VOLT','STONE','GALE','VENOM','MIND','SPIRIT','ALLOY','UMBRAL'];
+const PHYS={BEAST:1,STONE:1,GALE:1,VENOM:1,ALLOY:1}; // physical types; others use SPIRIT stat (special)
+/* CHART[attacker][defender] -> 2 (super), .5 (not very), 0 (no effect). Missing = 1.
+   ALLOY and UMBRAL are the two "newly discovered" types of the Solvane region. */
+const CHART={
+BEAST:{SPIRIT:0,STONE:.5,ALLOY:.5},
+EMBER:{FLORA:2,VENOM:2,ALLOY:2,EMBER:.5,TIDE:.5,STONE:.5},
+TIDE:{EMBER:2,STONE:2,TIDE:.5,FLORA:.5},
+FLORA:{TIDE:2,STONE:2,FLORA:.5,EMBER:.5,GALE:.5,VENOM:.5,ALLOY:.5},
+VOLT:{TIDE:2,GALE:2,VOLT:.5,FLORA:.5,STONE:0},
+STONE:{EMBER:2,VOLT:2,GALE:2,VENOM:2,FLORA:.5,ALLOY:.5},
+GALE:{FLORA:2,VENOM:2,VOLT:.5,STONE:.5,ALLOY:.5},
+VENOM:{FLORA:2,MIND:2,UMBRAL:2,STONE:.5,SPIRIT:.5,VENOM:.5,ALLOY:0},
+MIND:{VENOM:2,MIND:.5,ALLOY:.5,UMBRAL:0},
+SPIRIT:{SPIRIT:2,MIND:2,UMBRAL:.5,BEAST:0},
+ALLOY:{STONE:2,EMBER:.5,TIDE:.5,VOLT:.5,ALLOY:.5},
+UMBRAL:{MIND:2,SPIRIT:2,UMBRAL:.5,ALLOY:.5}};
+const TYPECOL={BEAST:'#a8a090',EMBER:'#e87838',TIDE:'#5090d8',FLORA:'#58b048',VOLT:'#d8b020',STONE:'#b09858',GALE:'#88a8e0',VENOM:'#9858b0',MIND:'#e070a0',SPIRIT:'#7068b8',ALLOY:'#8aa3ad',UMBRAL:'#564a63'};
+function effMul(t,defTypes){let m=1;for(const d of defTypes){const r=CHART[t]&&CHART[t][d];if(r!==undefined)m*=r}return m}
+
+//------------------------------------------------------------ moves
+const MV={
+pounce:{n:'POUNCE',t:'BEAST',p:40,a:100,pp:35},
+maul:{n:'MAUL',t:'BEAST',p:70,a:95,pp:20},
+dashstrike:{n:'DASH STRIKE',t:'BEAST',p:40,a:100,pp:25,pr:1},
+hyperram:{n:'HYPER RAM',t:'BEAST',p:85,a:90,pp:10},
+cower:{n:'COWER',t:'BEAST',p:0,a:100,pp:30,stat:{s:'atk',d:-1,who:'foe'}},
+rattle:{n:'RATTLE',t:'BEAST',p:0,a:100,pp:30,stat:{s:'def',d:-1,who:'foe'}},
+brace:{n:'BRACE',t:'BEAST',p:0,a:0,pp:30,stat:{s:'def',d:1,who:'self'}},
+singe:{n:'SINGE',t:'EMBER',p:40,a:100,pp:25,brn:10},
+flamelash:{n:'FLAME LASH',t:'EMBER',p:65,a:100,pp:15,brn:10},
+pyreburst:{n:'PYRE BURST',t:'EMBER',p:95,a:85,pp:8,brn:10},
+splashjet:{n:'SPLASHJET',t:'TIDE',p:40,a:100,pp:25},
+tidalwhip:{n:'TIDAL WHIP',t:'TIDE',p:65,a:100,pp:15},
+geyser:{n:'GEYSER',t:'TIDE',p:95,a:85,pp:8},
+mistveil:{n:'MIST VEIL',t:'TIDE',p:0,a:0,pp:20,stat:{s:'def',d:1,who:'self'}},
+leafdart:{n:'LEAF DART',t:'FLORA',p:40,a:100,pp:30},
+vinesnare:{n:'VINE SNARE',t:'FLORA',p:60,a:100,pp:20,stat:{s:'spe',d:-1,who:'foe',c:30}},
+bloomblast:{n:'BLOOM BLAST',t:'FLORA',p:95,a:85,pp:8},
+sapdrain:{n:'SAP DRAIN',t:'FLORA',p:40,a:100,pp:20,drain:1},
+sporecloud:{n:'SPORE CLOUD',t:'FLORA',p:0,a:75,pp:10,st:'SLP'},
+staticjolt:{n:'STATIC JOLT',t:'VOLT',p:40,a:100,pp:25,par:10},
+voltlance:{n:'VOLT LANCE',t:'VOLT',p:70,a:100,pp:15,par:10},
+stormcoil:{n:'STORM COIL',t:'VOLT',p:95,a:85,pp:8,par:10},
+numbpulse:{n:'NUMB PULSE',t:'VOLT',p:0,a:90,pp:15,st:'PAR'},
+pebbletoss:{n:'PEBBLE TOSS',t:'STONE',p:40,a:100,pp:30},
+rockfall:{n:'ROCKFALL',t:'STONE',p:70,a:90,pp:12},
+quakestomp:{n:'QUAKE STOMP',t:'STONE',p:85,a:95,pp:8},
+stoneguard:{n:'STONEGUARD',t:'STONE',p:0,a:0,pp:15,stat:{s:'def',d:2,who:'self'}},
+galeflick:{n:'GALEFLICK',t:'GALE',p:40,a:100,pp:30},
+wingcutter:{n:'WING CUTTER',t:'GALE',p:62,a:100,pp:20,hc:1},
+skydive:{n:'SKY DIVE',t:'GALE',p:88,a:90,pp:10},
+slipstream:{n:'SLIPSTREAM',t:'GALE',p:0,a:0,pp:15,stat:{s:'spe',d:2,who:'self'}},
+toxicnip:{n:'TOXIC NIP',t:'VENOM',p:40,a:100,pp:25,psn:20},
+venombarb:{n:'VENOM BARB',t:'VENOM',p:65,a:100,pp:15,psn:20},
+toxincloud:{n:'TOXIN CLOUD',t:'VENOM',p:0,a:90,pp:15,st:'PSN'},
+webbind:{n:'WEB BIND',t:'VENOM',p:0,a:95,pp:15,stat:{s:'spe',d:-2,who:'foe'}},
+mindjab:{n:'MIND JAB',t:'MIND',p:45,a:100,pp:25},
+psysurge:{n:'PSY SURGE',t:'MIND',p:85,a:100,pp:10,stat:{s:'spc',d:-1,who:'foe',c:20}},
+lullwave:{n:'LULL WAVE',t:'MIND',p:0,a:60,pp:10,st:'SLP'},
+dazzleglare:{n:'DAZZLE GLARE',t:'MIND',p:0,a:100,pp:20,stat:{s:'acc',d:-1,who:'foe'}},
+shadeswipe:{n:'SHADE SWIPE',t:'SPIRIT',p:45,a:100,pp:25},
+phantomrend:{n:'PHANTOM REND',t:'SPIRIT',p:78,a:100,pp:10},
+gravemist:{n:'GRAVE MIST',t:'SPIRIT',p:0,a:100,pp:20,stat:{s:'spc',d:-1,who:'foe'}},
+alloyclaw:{n:'ALLOY CLAW',t:'ALLOY',p:50,a:100,pp:25},
+forgeslam:{n:'FORGE SLAM',t:'ALLOY',p:82,a:90,pp:10},
+temper:{n:'TEMPER',t:'ALLOY',p:0,a:0,pp:20,stat:{s:'atk',d:1,who:'self'}},
+umbralfang:{n:'UMBRAL FANG',t:'UMBRAL',p:50,a:100,pp:25},
+nightreaver:{n:'NIGHT REAVER',t:'UMBRAL',p:78,a:95,pp:10},
+gloamveil:{n:'GLOAM VEIL',t:'UMBRAL',p:0,a:0,pp:15,stat:{s:'spc',d:1,who:'self'}},
+struggle:{n:'STRUGGLE',t:'BEAST',p:50,a:100,pp:0,rec:1}};
+
+//------------------------------------------------------------ items
+const IT={
+snare:{n:'SNARE',pr:200,k:'ball',m:1,d:'A coil device that snares wild Kin.'},
+primesnare:{n:'PRIME SNARE',pr:600,k:'ball',m:1.5,d:'A fine snare. Grips 1.5x better.'},
+apexsnare:{n:'APEX SNARE',pr:1200,k:'ball',m:2,d:'Top craft snare. Grips 2x better.'},
+tonic:{n:'TONIC',pr:200,k:'heal',hp:20,d:'Restores 20 HP to one Kin.'},
+supertonic:{n:'SUPER TONIC',pr:700,k:'heal',hp:60,d:'Restores 60 HP to one Kin.'},
+remedy:{n:'REMEDY',pr:250,k:'cure',d:'Cures any status problem.'},
+rekindle:{n:'REKINDLE',pr:1500,k:'rev',d:'Revives a fainted Kin to half HP.'},
+juneberry:{n:'JUNEBERRY',pr:150,k:'held',d:'HELD: restores 12 HP when low.'},
+bitterroot:{n:'BITTERROOT',pr:300,k:'held',d:'HELD: cures the first status problem.'},
+powerband:{n:'POWER BAND',pr:900,k:'held',d:'HELD: boosts all damage 10%.'},
+quickquill:{n:'QUICK QUILL',pr:800,k:'held',d:'HELD: raises SPEED 12%.'},
+irontalisman:{n:'IRON TALISMAN',pr:800,k:'held',d:'HELD: raises DEFENSE 12%.'},
+cinderfang:{n:'CINDER FANG',pr:800,k:'held',d:'HELD: EMBER moves +20%.'},
+tidepearl:{n:'TIDE PEARL',pr:800,k:'held',d:'HELD: TIDE moves +20%.'},
+leafcrest:{n:'LEAF CREST',pr:800,k:'held',d:'HELD: FLORA moves +20%.'},
+stormcell:{n:'STORM CELL',pr:800,k:'held',d:'HELD: VOLT moves +20%.'},
+coincharm:{n:'COIN CHARM',pr:1000,k:'held',d:'HELD: 1.5x prize money.'},
+alloycore:{n:'ALLOY CORE',pr:2100,k:'evo',d:'Strange ore. Evolves certain Kin.'}};
+const BAGORDER=['snare','primesnare','apexsnare','tonic','supertonic','remedy','rekindle','juneberry','bitterroot','powerband','quickquill','irontalisman','cinderfang','tidepearl','leafcrest','stormcell','coincharm','alloycore'];
+
+//------------------------------------------------------------ the Kindex: original species (append new Kin at the END - never reorder ids, saves depend on them)
+// px: 16 rows split by '|'; 8-char rows are mirrored to 16px. chars: . transparent, 1-5 palette
+const SP=[null,
+{n:'KINDLIT',t:['EMBER'],bs:{hp:39,at:52,df:40,sc:55,sp:58},cr:45,xy:62,ev:{l:16,to:2},
+ mv:[[1,'pounce'],[1,'cower'],[7,'singe'],[13,'dashstrike'],[19,'flamelash'],[27,'pyreburst']],
+ dex:'Its tail tuft sparks when it is happy. It naps in warm ash.',
+ pal:['#4a2c20','#e8843c','#f6d8a0','#f8e060'],
+ px:'.......4|......44|..1...4.|.121..1.|.1221111|.1222222|12222122|12322222|12222223|.1222222|..122223|..122233|..122233|..122223|...11.1.|........'},
+{n:'PYRELYNX',t:['EMBER'],bs:{hp:60,at:75,df:58,sc:80,sp:85},cr:45,xy:150,ev:null,
+ mv:[[1,'pounce'],[1,'cower'],[1,'singe'],[13,'dashstrike'],[21,'flamelash'],[28,'maul'],[33,'pyreburst']],
+ dex:'It stalks the dusk. Its whiskers glow like lit fuses.',
+ pal:['#3c2418','#d8642c','#f6d8a0','#f8e060'],
+ px:'..4....4|..14..44|..11..4.|.1221.1.|.1222111|12222222|12221222|12232222|12222223|.1222222|.1222223|.1222333|..122233|..122223|..12..12|..11..11'},
+{n:'DRIZZLET',t:['TIDE'],bs:{hp:46,at:48,df:52,sc:58,sp:50},cr:45,xy:63,ev:{l:16,to:4},
+ mv:[[1,'pounce'],[1,'cower'],[7,'splashjet'],[13,'mistveil'],[19,'tidalwhip'],[27,'geyser']],
+ dex:'It carries a raincloud mood. Its cries make tiny puddles.',
+ pal:['#20406c','#58a0e0','#a8d8f0','#f0f8ff'],
+ px:'........|...1111.|..122222|.1222222|.1212222|31222222|33122222|31222222|.1222222|.1222233|..122233|..122223|...12222|..11..1.|........|........'},
+{n:'TORRENEWT',t:['TIDE'],bs:{hp:68,at:68,df:78,sc:85,sp:65},cr:45,xy:152,ev:null,
+ mv:[[1,'pounce'],[1,'cower'],[1,'splashjet'],[13,'mistveil'],[21,'tidalwhip'],[28,'sapdrain'],[33,'geyser']],
+ dex:'One flick of its tail can turn a stream into a torrent.',
+ pal:['#183a64','#3878c8','#70c8d8','#f0f8ff'],
+ px:'.......4|......44|.....441|...11421|..122221|.1222222|.1212222|31222222|33122222|.1222223|.1222233|.1222233|..122223|..122222|..12..12|..11..11'},
+{n:'SPROUTLE',t:['FLORA'],bs:{hp:50,at:49,df:60,sc:52,sp:42},cr:45,xy:64,ev:{l:16,to:6},
+ mv:[[1,'pounce'],[1,'brace'],[7,'leafdart'],[13,'sapdrain'],[19,'vinesnare'],[27,'bloomblast']],
+ dex:'A seed sleeps under its shell. It hums to help it grow.',
+ pal:['#2c4424','#68b048','#a8d878','#406830'],
+ px:'.....44.|....441.|....41..|...111..|..13331.|.133333.|13333331|13313331|.133333.|.1222221|12424242|12242424|.1222221|..1..1..|..11.11.|........'},
+{n:'CANOPINE',t:['FLORA'],bs:{hp:75,at:70,df:88,sc:78,sp:52},cr:45,xy:158,ev:null,
+ mv:[[1,'pounce'],[1,'brace'],[1,'leafdart'],[13,'sapdrain'],[21,'vinesnare'],[28,'stoneguard'],[33,'bloomblast']],
+ dex:'Whole flocks nest in its canopy. It walks once a season.',
+ pal:['#24381c','#509838','#88c860','#6c4828'],
+ px:'...333..|..33333.|.3333333|.3333333|33333333|.3333333|..33333.|...111..|..13331.|.1333331|13333333|.1444441|14242424|.1444441|..1...1.|..11.11.'},
+{n:'SCURRIT',t:['BEAST'],bs:{hp:32,at:50,df:34,sc:32,sp:62},cr:255,xy:46,ev:{l:15,to:8},
+ mv:[[1,'pounce'],[1,'cower'],[8,'dashstrike'],[15,'maul'],[22,'hyperram']],
+ dex:'It stuffs its cheeks with seeds and gossip alike.',
+ pal:['#4a3424','#b08850','#e8d0a0','#604830'],
+ px:'........|..11....|.1221...|.1221111|.1222222|12221222|12332222|12332223|.1222223|.1222233|..122233|..122223|...12222|..11..1.|........|........'},
+{n:'VERMANE',t:['BEAST'],bs:{hp:58,at:78,df:56,sc:50,sp:92},cr:130,xy:118,ev:null,
+ mv:[[1,'pounce'],[1,'cower'],[1,'dashstrike'],[17,'maul'],[24,'rattle'],[30,'hyperram']],
+ dex:'Its mane bristles at lies. Farmers trust it with the keys.',
+ pal:['#3c2c1c','#a87840','#e8d0a0','#704818'],
+ px:'..1.....|.121....|.1211...|.1224444|.1222444|12221244|12222244|12322244|12222234|.1222223|.1422223|.1442233|..442233|..122223|..12..12|..11..11'},
+{n:'PEEPLIT',t:['GALE'],bs:{hp:38,at:42,df:36,sc:34,sp:60},cr:255,xy:50,ev:{l:18,to:10},
+ mv:[[1,'galeflick'],[1,'cower'],[9,'wingcutter'],[15,'slipstream'],[22,'skydive']],
+ dex:'It practices one chirp all day until the note is perfect.',
+ pal:['#403018','#d8b060','#f6e8c0','#e87830'],
+ px:'........|...111..|..12221.|.1222221|.1212221|.1222224|31222224|33122222|31222223|.1222233|.1222233|..122223|...1111.|...1.1..|..14.41.|........'},
+{n:'GALEHAWK',t:['GALE'],bs:{hp:65,at:72,df:58,sc:52,sp:96},cr:120,xy:148,ev:null,
+ mv:[[1,'galeflick'],[1,'cower'],[1,'wingcutter'],[19,'slipstream'],[25,'skydive'],[31,'hyperram']],
+ dex:'It surfs storm fronts for fun. Its feathers cut like knives.',
+ pal:['#2c2418','#8898b8','#e8e8e0','#e8a030'],
+ px:'...11...|..1221..|..12211.|..12224.|.1122244|.1212224|11222222|31222222|33122223|33122233|31222233|.1122223|..112223|...11122|...14.4.|...11.1.'},
+{n:'WRIGGLARV',t:['VENOM'],bs:{hp:40,at:35,df:40,sc:30,sp:35},cr:255,xy:39,ev:{l:12,to:12},
+ mv:[[1,'toxicnip'],[1,'webbind'],[9,'leafdart']],
+ dex:'It tastes the air with its horn. Mostly it tastes dirt.',
+ pal:['#384024','#88a848','#c8d870','#d85858'],
+ px:'.....44.|.....4..|....11..|...1221.|...12221|..112221|.1221222|.1222122|.1222222|11222222|12212222|12212223|11222233|.1122233|..112223|...1111.'},
+{n:'MOTHVEIL',t:['VENOM','GALE'],bs:{hp:62,at:52,df:55,sc:82,sp:74},cr:130,xy:128,ev:null,
+ mv:[[1,'toxicnip'],[1,'webbind'],[1,'galeflick'],[12,'sporecloud'],[18,'wingcutter'],[24,'venombarb'],[30,'skydive']],
+ dex:'Its wing dust paints dreams. Lamplight makes it dizzy.',
+ pal:['#3c3048','#b090d8','#e8d8f0','#68d8c0'],
+ px:'.1....1.|..1..1..|333..133|3443.122|34443122|33444122|.3344122|..334122|..331222|.3341222|33441222|34441223|34411233|331.1133|3...111.|........'},
+{n:'THISTLIT',t:['FLORA'],bs:{hp:42,at:55,df:48,sc:40,sp:46},cr:220,xy:56,ev:{l:14,to:14},
+ mv:[[1,'leafdart'],[1,'brace'],[8,'toxicnip'],[13,'vinesnare'],[18,'sapdrain'],[26,'bloomblast']],
+ dex:'Prickly outside, sweet sap inside. Do not hug it.',
+ pal:['#2c4020','#58a040','#98d068','#d868a0'],
+ px:'....4...|.1..4..1|..1.1.1.|...111..|..12221.|.1222221|11212221|.1222221|11222221|.1222221|11222221|.1222221|..12221.|...111..|..1...1.|..11.11.'},
+{n:'BRAMBLORE',t:['FLORA','VENOM'],bs:{hp:66,at:86,df:70,sc:56,sp:58},cr:110,xy:140,ev:null,
+ mv:[[1,'leafdart'],[1,'brace'],[1,'toxicnip'],[16,'vinesnare'],[22,'maul'],[30,'bloomblast']],
+ dex:'Old hedges wake as BRAMBLORE. It guards forgotten paths.',
+ pal:['#1c3018','#3c7030','#78b050','#e8e050'],
+ px:'.1..1..1|..1.1.1.|.1311311|13332333|13233323|.1333333|13343133|13333313|.1334333|13333333|13233233|.1333333|.1133331|..113311|..11..11|..1...1.'},
+{n:'ZUMBEE',t:['VOLT','VENOM'],bs:{hp:38,at:48,df:38,sc:52,sp:68},cr:190,xy:58,ev:{l:15,to:16},
+ mv:[[1,'staticjolt'],[1,'toxicnip'],[10,'numbpulse'],[16,'venombarb']],
+ dex:'It hums at exactly the pitch of a struck power line.',
+ pal:['#383018','#e8c830','#f8f0d0','#403828'],
+ px:'.1....1.|..1..1..|..3313..|..1221..|.122221.|.121221.|.1222213|31222133|33144133|31444413|.1444413|31111113|33144133|.314413.|..1111..|...44...'},
+{n:'QUILLZAP',t:['VOLT','VENOM'],bs:{hp:60,at:68,df:55,sc:85,sp:95},cr:90,xy:144,ev:null,
+ mv:[[1,'staticjolt'],[1,'toxicnip'],[1,'numbpulse'],[18,'voltlance'],[25,'venombarb'],[32,'stormcoil']],
+ dex:'Its quills store a thundercloud worth of static.',
+ pal:['#302810','#d8b020','#f8f0c0','#584830'],
+ px:'2..1..2.|.2.1.2..|..212...|..1221..|.1222211|.1212212|21222212|.2122212|..212212|2..21212|.2..2122|..2..212|.1444441|.1411141|..11111.|...4.4..'},
+{n:'PEBBLIT',t:['STONE'],bs:{hp:48,at:68,df:90,sc:30,sp:22},cr:190,xy:73,ev:{item:'alloycore',to:18},
+ mv:[[1,'pebbletoss'],[1,'brace'],[12,'stoneguard'],[16,'rockfall'],[24,'quakestomp']],
+ dex:'It naps as a pebble for years. Hikers apologize to it.',
+ pal:['#3c3834','#908878','#c8c0b0','#686058'],
+ px:'........|........|...1111.|..122221|.1222222|12122122|12222222|12232232|12222222|.1222221|11222211|12122121|12222221|.122221.|..1111..|........'},
+{n:'FERROLITH',t:['STONE','ALLOY'],bs:{hp:70,at:95,df:130,sc:45,sp:30},cr:60,xy:170,ev:null,
+ mv:[[1,'pebbletoss'],[1,'alloyclaw'],[1,'stoneguard'],[14,'temper'],[20,'forgeslam'],[26,'quakestomp']],
+ dex:'Strange ore woke it. Compass needles refuse to point near it.',
+ pal:['#2c3038','#788088','#c8d0d8','#58c8c0'],
+ px:'...1111.|..122221|.1224222|12242422|12422242|12122122|14222222|12232232|12224222|11242221|12422122|14222421|12242221|11222211|.122221.|..1111..'},
+{n:'DUSKAT',t:['UMBRAL'],bs:{hp:44,at:58,df:42,sc:48,sp:72},cr:190,xy:66,ev:{l:20,to:20},
+ mv:[[1,'pounce'],[1,'cower'],[8,'umbralfang'],[14,'gloamveil'],[20,'nightreaver']],
+ dex:'It blinks and the streetlights flicker. A night gossip.',
+ pal:['#181420','#403850','#685880','#e8d048'],
+ px:'........|..1...1.|.121.121|.1221221|.1222221|.1242421|12222222|12222222|12223222|.1222221|..122221|..122223|..122233|..122223|...12.12|...11.11'},
+{n:'SHADOWMANE',t:['UMBRAL'],bs:{hp:68,at:88,df:60,sc:70,sp:104},cr:75,xy:156,ev:null,
+ mv:[[1,'pounce'],[1,'umbralfang'],[1,'gloamveil'],[22,'nightreaver'],[28,'maul']],
+ dex:'It runs between shadows. Only its eyes ever catch the light.',
+ pal:['#100c18','#2c2440','#4c3c68','#e8d048'],
+ px:'..1.....|.121...1|.1211.13|.1221133|.1222133|12242133|12222113|12222223|12223222|.1222221|.1322221|13322223|.3122233|..122223|..12..12|..11..11'},
+{n:'OWLUME',t:['SPIRIT','GALE'],bs:{hp:56,at:40,df:46,sc:72,sp:64},cr:140,xy:98,ev:null,
+ mv:[[1,'galeflick'],[1,'shadeswipe'],[10,'dazzleglare'],[14,'lullwave'],[18,'wingcutter'],[24,'phantomrend']],
+ dex:'A lantern soul nests in its chest and never burns out.',
+ pal:['#2c2438','#685888','#b8a8c8','#f8d860'],
+ px:'.1.....1|.11...11|.121.121|.1221221|.1222221|.1242421|11222221|31222221|33122443|33124443|31222443|.1222221|.1122221|..11111.|...1.1..|..11.11.'},
+{n:'LANTHORN',t:['SPIRIT'],bs:{hp:38,at:42,df:36,sc:86,sp:78},cr:140,xy:96,ev:null,
+ mv:[[1,'shadeswipe'],[1,'gravemist'],[10,'singe'],[16,'lullwave'],[22,'phantomrend']],
+ dex:"A wisp wearing an old miner's lamp. It guides, or misleads.",
+ pal:['#28203c','#584d80','#9888c0','#f8e060'],
+ px:'...111..|..12221.|...111..|..14441.|..14441.|.1444441|.1444441|..14441.|...111..|..12221.|.1222221|.1222221|.1222221|..12221.|..3.1.3.|.3..3..3'},
+{n:'PUFFLING',t:['BEAST'],bs:{hp:45,at:32,df:40,sc:45,sp:38},cr:170,xy:60,ev:{fr:160,to:24},
+ mv:[[1,'pounce'],[1,'cower'],[10,'lullwave'],[14,'dashstrike'],[20,'mindjab']],
+ dex:'A ball of down and trust. It bonds with whoever is kind.',
+ pal:['#584430','#f0e0c0','#f8f4e8','#e8a0a8'],
+ px:'........|........|...111..|..12221.|.1222221|.1212212|12222221|12222223|12232232|12222221|31222221|33122223|31222233|.1222223|..12221.|...1.1..'},
+{n:'SERAPHUFF',t:['BEAST','GALE'],bs:{hp:72,at:55,df:68,sc:86,sp:72},cr:90,xy:146,ev:null,
+ mv:[[1,'pounce'],[1,'galeflick'],[1,'lullwave'],[18,'wingcutter'],[24,'skydive'],[28,'psysurge']],
+ dex:'Raised with love, it learned to fly on joy alone.',
+ pal:['#504030','#f0e8d8','#f8f8f0','#f0c860'],
+ px:'...44...|..4..4..|...111..|..12221.|.1222221|.1212212|31222221|33222223|33322232|33222221|33122221|.3122223|31222233|.1222223|..12221.|...1.1..'},
+{n:'PSYFAWN',t:['MIND'],bs:{hp:45,at:38,df:42,sc:70,sp:56},cr:160,xy:68,ev:{l:20,to:26},
+ mv:[[1,'pounce'],[1,'dazzleglare'],[10,'mindjab'],[16,'lullwave'],[22,'psysurge']],
+ dex:"It dreams tomorrow's weather and stamps it in the dew.",
+ pal:['#403028','#c89070','#f0e0c8','#e858a0'],
+ px:'..1.....|.121...4|.1211.44|.12211.4|.1222111|.1222221|12212221|12222221|12222223|.1222221|.1322321|.1233221|..122221|..122221|..12..12|..11..11'},
+{n:'MYSTAG',t:['MIND'],bs:{hp:70,at:55,df:62,sc:100,sp:82},cr:75,xy:160,ev:null,
+ mv:[[1,'pounce'],[1,'mindjab'],[1,'dazzleglare'],[18,'psysurge'],[24,'gravemist'],[30,'lullwave']],
+ dex:'Its antlers comb stray thoughts out of the morning fog.',
+ pal:['#2c2030','#a07850','#e8d8c0','#e858c8'],
+ px:'4..1..1.|.4.1..1.|44111.1.|.441111.|..412214|...12244|..122214|.1222221|12212221|12222221|12222223|.1222321|.1233221|..122221|..12..12|..11..11'},
+{n:'ECHOWING',t:['GALE','UMBRAL'],bs:{hp:42,at:50,df:38,sc:44,sp:80},cr:220,xy:55,ev:null,
+ mv:[[1,'galeflick'],[1,'toxicnip'],[10,'umbralfang'],[16,'wingcutter'],[22,'nightreaver']],
+ dex:'It sees with sound. Caves repeat its name forever.',
+ pal:['#1c1828','#4c4068','#8070a0','#e8e8f0'],
+ px:'..1..1..|..1111..|.112211.|.121121.|11222211|31222213|33122133|33312333|33331333|33133313|31333331|13333331|.133331.|..1331..|...11...|........'},
+{n:'CLAWKET',t:['TIDE'],bs:{hp:52,at:72,df:68,sc:40,sp:44},cr:190,xy:70,ev:null,
+ mv:[[1,'splashjet'],[1,'brace'],[12,'maul'],[18,'tidalwhip'],[24,'stoneguard']],
+ dex:'It collects bottle caps and guards them like treasure.',
+ pal:['#502018','#d86040','#f0a878','#f8e8d0'],
+ px:'.11..1..|1221.1..|12221...|.1221...|..11....|..111111|.1222221|.1212212|12222222|12232232|12222222|.1222221|..111111|..1.1.1.|.11.1.11|........'},
+{n:'IMBERN',t:['EMBER'],bs:{hp:50,at:64,df:44,sc:66,sp:58},cr:150,xy:88,ev:null,
+ mv:[[1,'singe'],[1,'cower'],[11,'dashstrike'],[15,'flamelash'],[20,'gloamveil'],[26,'pyreburst']],
+ dex:'A mischief spirit of warm hearths. It eats spare embers.',
+ pal:['#481c14','#c84028','#f0a050','#f8e060'],
+ px:'.4....4.|.44..44.|..4..4..|..1441..|..1441..|..1111..|.122221.|.1212211|12222221|12222232|12223221|.1222221|.1122211|..12221.|..1...1.|.11...11'},
+{n:'NOCTELK',t:['UMBRAL','MIND'],bs:{hp:90,at:85,df:80,sc:105,sp:110},cr:5,xy:220,ev:null,
+ mv:[[1,'nightreaver'],[1,'mindjab'],[1,'dazzleglare'],[1,'gloamveil']],
+ dex:'A legend that walks the night between the three roads.',
+ pal:['#0c0814','#241c34','#443860','#78e8d8'],
+ px:'4..1..1.|.4.1..1.|44111.1.|.4411114|..412214|...12244|..122214|.1222441|12212221|12222221|12222223|.1222221|.1222221|..122221|..12..12|..11..11'},
+{n:'ARCLEON',t:['VOLT'],bs:{hp:72,at:78,df:66,sc:98,sp:104},cr:60,xy:166,ev:null,
+ mv:[[1,'staticjolt'],[1,'cower'],[1,'dashstrike'],[16,'voltlance'],[22,'slipstream'],[28,'numbpulse'],[34,'stormcoil']],
+ dex:'Storms trail it like hounds. Its roar reroutes the lightning.',
+ pal:['#2c2814','#e8c828','#f8f0b0','#68a0e0'],
+ px:'.....14.|..4..12.|..14.12.|...11122|..122222|.1222222|.1221222|.1222222|.1133322|.1233322|.1223222|.1222222|..122224|..12222.|..12.12.|..11.11.'}
+];
+const STARTERS=[1,3,5];
+const RIVALPICK={1:3,3:5,5:1}; // rival takes the starter strong against yours
+
+//------------------------------------------------------------ human sprites
+const HERO={
+ d1:'........|...111..|..12221.|.1222222|.1333333|.1313333|.1333333|..133333|.1122222|13122222|13122222|.1144444|..144444|..144...|..111...|........',
+ d2:'........|........|...111..|..12221.|.1222222|.1333333|.1313333|.1333333|..133333|.1122222|13122222|13122222|..144444|..14444.|..11111.|........',
+ u1:'........|...111..|..12221.|.1222222|.1222222|.1222222|.1222222|..122222|.1122222|13122222|13122222|.1144444|..144444|..144...|..111...|........',
+ u2:'........|........|...111..|..12221.|.1222222|.1222222|.1222222|.1222222|..122222|.1122222|13122222|13122222|..144444|..14444.|..11111.|........',
+ s1:'................|......1111......|.....122221.....|....1222222.....|...112222221....|...13322221.....|...13132221.....|...13332221.....|....133221......|....1222221.....|...12222221.....|...13222221.....|....144441......|....1414441.....|....11..111.....|................',
+ s2:'................|................|......1111......|.....122221.....|....1222222.....|...112222221....|...13322221.....|...13132221.....|...13332221.....|....133221......|....1222221.....|...12222221.....|....144441......|.....14441......|.....11111......|................'};
+const HEROPAL=['#2c2424','#d04040','#f0c8a0','#3858a8','#f8f8f8'];
+const NPCSPR={
+ d:'........|...111..|..12221.|.1222221|.1333333|.1313333|.1333333|..133333|.1144444|13144444|13144444|..144444|..155555|..155...|..111...|........',
+ u:'........|...111..|..12221.|.1222221|.1222222|.1222222|.1222222|..122222|.1144444|13144444|13144444|..144444|..155555|..155...|..111...|........',
+ s:'................|......1111......|.....122221.....|....1222221.....|....1332222.....|....1313222.....|....1333222.....|.....13322......|....1444441.....|....1444441.....|...134444431....|.....14444......|.....15555......|.....15155......|.....11.11......|................'};
+const PALS={
+ kid:['#2c2424','#7c5028','#f0c8a0','#e8c040','#487038'],
+ lass:['#2c2424','#c87838','#f0c8a0','#e87898','#f0e8e0'],
+ oldman:['#2c2424','#c8c8c0','#e8c8a0','#a08858','#605040'],
+ prof:['#2c2424','#b0b0a8','#f0c8a0','#f0f0e8','#705838'],
+ mom:['#2c2424','#7c4828','#f0c8a0','#48a098','#806048'],
+ nurse:['#2c2424','#f098b0','#f0c8a0','#f8f8f8','#e87898'],
+ clerk:['#2c2424','#403828','#f0c8a0','#4870c0','#303848'],
+ grunt:['#1c1824','#28203c','#d8b8a0','#383050','#241e30'],
+ officer:['#1c1824','#503060','#d8b8a0','#5c3878','#2c2038'],
+ hiker:['#2c2424','#6c4828','#e8b890','#c05038','#706858'],
+ miner:['#2c2424','#e8c030','#e8b890','#9a7848','#585048'],
+ vendor:['#2c2424','#3c3050','#e8c0a0','#8858b0','#403858'],
+ guard:['#2c2424','#384878','#f0c8a0','#4868b0','#303a58'],
+ aide:['#2c2424','#584830','#f0c8a0','#c8d0d8','#506048'],
+ briar:['#243020','#4f9040','#f0c8a0','#7cb858','#3c5830'],
+ brava:['#301c14','#d84828','#f0c8a0','#e88838','#702c1c'],
+ rook:['#242430','#b8c0c8','#f0c8a0','#8c2c34','#34344c'],
+ noct:['#1c1824','#3c3050','#c8b8d8','#241e34','#181420'],
+ bronte:['#2c2414','#d8b020','#f0c8a0','#3a5a9a','#5a4a20']};
+
+//------------------------------------------------------------ tiles (procedurally drawn at boot)
+const TIL={};
+function mkTile(fn){const c=document.createElement('canvas');c.width=TS;c.height=TS;const x=c.getContext('2d');fn(x,(cx,cy,w,h,col)=>{x.fillStyle=col;x.fillRect(cx,cy,w,h)});return c}
+function speck(R,base,dot,seed,n){let s=seed;const rnd=()=>((s=(s*1103515245+12345)&0x7fffffff)/0x7fffffff);R(0,0,16,16,base);for(let i=0;i<n;i++){R(fl(rnd()*15),fl(rnd()*15),1+fl(rnd()*2),1,dot)}}
+function buildTiles(){
+TIL['.']=mkTile((x,R)=>speck(R,'#88c070','#74ac5c',3,9));
+TIL['g']=mkTile((x,R)=>{speck(R,'#80b868','#6ca05c',5,6);for(let i=0;i<4;i++)for(let j=0;j<2;j++){const bx=i*4,by=j*8;R(bx+1,by+2,1,5,'#346840');R(bx+2,by+1,1,6,'#48905c');R(bx+3,by+3,1,4,'#346840')}});
+TIL['f']=mkTile((x,R)=>{speck(R,'#88c070','#74ac5c',7,7);R(3,3,2,2,'#e85858');R(4,2,1,1,'#f8e060');R(10,9,2,2,'#f8e060');R(11,8,1,1,'#e85858');R(3,5,1,2,'#3c7848');R(11,11,1,2,'#3c7848')});
+TIL['-']=mkTile((x,R)=>speck(R,'#d8c088','#c0a060',11,10));
+TIL['w']=mkTile((x,R)=>{speck(R,'#4078c8','#3060a8',13,5);R(2,3,5,1,'#80b0e8');R(9,7,5,1,'#80b0e8');R(4,11,5,1,'#80b0e8');R(11,13,3,1,'#2c5898')});
+TIL['T']=mkTile((x,R)=>{speck(R,'#88c070','#74ac5c',17,5);R(6,11,4,5,'#6c4828');R(7,10,2,1,'#583a20');R(2,1,12,9,'#2c5c34');R(3,0,10,2,'#2c5c34');R(3,2,10,7,'#3f8446');R(4,2,4,2,'#5cb05c');R(9,4,3,2,'#5cb05c');R(3,8,10,2,'#234c2c')});
+TIL['L']=mkTile((x,R)=>{speck(R,'#88c070','#74ac5c',19,6);R(0,9,16,2,'#5c8c4c');R(0,11,16,3,'#c8a060');R(0,14,16,2,'#8a6838');R(2,12,2,1,'#e0c080');R(9,12,3,1,'#e0c080')});
+TIL['F']=mkTile((x,R)=>{speck(R,'#88c070','#74ac5c',23,6);R(2,4,3,9,'#a07840');R(11,4,3,9,'#a07840');R(0,6,16,2,'#c09858');R(0,10,16,2,'#c09858');R(2,4,3,1,'#704c20');R(11,4,3,1,'#704c20')});
+TIL['S']=mkTile((x,R)=>{speck(R,'#88c070','#74ac5c',29,6);R(7,9,2,6,'#6c4828');R(2,2,12,7,'#c8a060');R(2,2,12,1,'#8a6838');R(2,8,12,1,'#8a6838');R(4,4,8,1,'#6c4828');R(4,6,6,1,'#6c4828')});
+TIL['r']=mkTile((x,R)=>{speck(R,'#88c070','#74ac5c',31,5);R(3,5,10,9,'#8a8276');R(4,4,8,1,'#a8a092');R(4,5,4,3,'#b8b0a0');R(3,12,10,2,'#5c564c');R(2,8,1,5,'#6a6458');R(13,8,1,5,'#6a6458')});
+TIL['C']=mkTile((x,R)=>{R(0,0,16,16,'#585048');R(0,0,16,2,'#6a6258');R(4,4,8,12,'#181418');R(3,6,1,10,'#181418');R(12,6,1,10,'#181418');R(5,3,6,1,'#181418')});
+TIL['D']=mkTile((x,R)=>{R(0,0,16,16,'#6c4828');R(2,2,12,14,'#3a2c1c');R(3,3,10,13,'#241a10');R(10,9,2,2,'#c8a060')});
+const roof=(base,hi,lo)=>mkTile((x,R)=>{R(0,0,16,16,base);R(0,0,16,2,hi);R(0,5,16,1,lo);R(0,10,16,1,lo);R(0,14,16,2,lo)});
+TIL['R']=roof('#c84840','#e07060','#8c2c28');TIL['B']=roof('#5070c0','#7898e0','#34487c');TIL['P']=roof('#9058b0','#b07cd0','#5c3474');
+TIL['W']=mkTile((x,R)=>{R(0,0,16,16,'#e8d8b0');R(0,0,16,1,'#c8b890');R(0,13,16,3,'#b8a880');R(5,4,1,9,'#d0c098');R(11,4,1,9,'#d0c098')});
+TIL['o']=mkTile((x,R)=>{R(0,0,16,16,'#e8d8b0');R(0,13,16,3,'#b8a880');R(3,3,10,8,'#705838');R(4,4,8,6,'#284878');R(7,4,1,6,'#4068a0');R(4,7,8,1,'#4068a0')});
+TIL['x']=mkTile((x,R)=>{speck(R,'#36323e','#2a2630',37,5);R(0,0,7,7,'#403c4c');R(8,0,8,7,'#3a3646');R(0,8,7,8,'#3a3646');R(8,8,8,8,'#403c4c');R(0,7,16,1,'#221e2a');R(7,0,1,8,'#221e2a');R(0,15,16,1,'#221e2a');R(8,8,1,8,'#221e2a');R(1,1,4,1,'#4c4858')});
+TIL['q']=mkTile((x,R)=>speck(R,'#6c6058','#5a504a',41,11));
+TIL['#']=mkTile((x,R)=>{R(0,0,16,16,'#586078');R(0,0,16,3,'#6c7490');R(0,12,16,4,'#3c4258');R(0,11,16,1,'#2c3044')});
+TIL['_']=mkTile((x,R)=>{R(0,0,16,16,'#e0d8c0');R(0,0,1,1,'#c8bca0');R(8,8,1,1,'#c8bca0');R(0,8,1,1,'#d0c4a8');R(8,0,1,1,'#d0c4a8')});
+TIL['k']=mkTile((x,R)=>{R(0,0,16,16,'#90642c');R(0,0,16,7,'#c89858');R(0,0,16,1,'#e0b878');R(0,6,16,1,'#704c20');R(2,9,2,5,'#7c541f');R(12,9,2,5,'#7c541f')});
+TIL['p']=mkTile((x,R)=>{R(0,0,16,16,'#e0d8c0');R(2,2,12,10,'#303848');R(3,3,10,7,'#68c8d0');R(4,4,5,1,'#a8e8e8');R(5,12,6,3,'#485068')});
+TIL['h']=mkTile((x,R)=>{R(0,0,16,16,'#8a5c34');R(1,1,14,6,'#5c3a1c');R(2,2,3,5,'#c05048');R(6,2,3,5,'#4870c0');R(10,2,3,5,'#58a048');R(0,8,16,1,'#a87848');R(1,9,14,6,'#5c3a1c');R(3,10,3,5,'#d8b040');R(8,10,3,5,'#7858b0')});
+TIL['e']=mkTile((x,R)=>{R(0,0,16,16,'#e0d8c0');R(1,1,14,14,'#f0f0f0');R(1,1,14,4,'#f8f8f8');R(1,5,14,10,'#c85868');R(1,5,14,1,'#9a3c4c');R(2,7,12,1,'#e88898')});
+TIL['a']=mkTile((x,R)=>{R(0,0,16,16,'#e0d8c0');R(1,2,14,10,'#b08048');R(1,2,14,2,'#d0a068');R(2,12,2,3,'#7c541f');R(12,12,2,3,'#7c541f')});
+TIL['m']=mkTile((x,R)=>{R(0,0,16,16,'#c86060');R(0,0,16,2,'#e8a0a0');R(0,14,16,2,'#e8a0a0');R(0,0,2,16,'#e8a0a0');R(14,0,2,16,'#e8a0a0');R(6,6,4,4,'#a84050')});
+TIL['d']=mkTile((x,R)=>{R(0,0,16,16,'#b8b890');R(1,1,14,14,'#cccfa0');R(2,2,12,12,'#b8b890');R(0,0,16,1,'#8a8a68')});
+TIL['H']=mkTile((x,R)=>{speck(R,'#2c5c34','#234c2c',43,8);R(1,2,4,3,'#418a48');R(8,1,5,3,'#418a48');R(3,8,5,4,'#418a48');R(10,9,4,3,'#357240');R(0,14,16,2,'#1c3c22')});
+TIL['Y']=mkTile((x,R)=>{speck(R,'#3c7848','#2c5c34',47,8);R(2,3,3,3,'#58a860');R(9,8,3,3,'#58a860');R(4,10,2,2,'#f8e060');R(11,3,2,2,'#f8e060');R(0,14,16,2,'#234c2c')});
+TIL['Z']=mkTile((x,R)=>{speck(R,'#3c7848','#2c5c34',53,8);R(2,3,3,3,'#58a860');R(9,8,3,3,'#58a860');R(4,10,2,2,'#e87898');R(11,3,2,2,'#e87898');R(0,14,16,2,'#234c2c')});
+TIL['u']=mkTile((x,R)=>{R(0,0,16,16,'#e0d8c0');R(3,3,10,10,'#b0a888');R(5,5,6,6,'#c84840');R(5,5,6,1,'#e87060');R(5,10,6,1,'#8c2c28')});
+TIL['U']=mkTile((x,R)=>{R(0,0,16,16,'#e0d8c0');R(3,3,10,10,'#b0a888');R(5,5,6,6,'#5070c0');R(5,5,6,1,'#7898e0');R(5,10,6,1,'#34487c')});
+TIL['i']=mkTile((x,R)=>{R(0,0,16,16,'#cfe8f0');R(2,2,5,1,'#f0fbff');R(9,7,5,1,'#f0fbff');R(4,12,5,1,'#aacede');R(12,3,2,1,'#aacede');R(0,15,16,1,'#a8c8d8')});
+TIL['n']=mkTile((x,R)=>{R(0,0,16,16,'#e0d8c0');R(4,12,8,3,'#888078');R(5,4,6,8,'#a8a098');R(5,2,6,3,'#b8b0a8');R(6,4,1,1,'#686058');R(9,4,1,1,'#686058')});
+{const cb=R=>{R(0,0,16,16,'#26304a');R(0,0,16,1,'#34406a');R(0,15,16,1,'#1a2238')};
+ const chev=(R,cy,c)=>{R(7,cy,2,2,c);R(5,cy+2,2,2,c);R(9,cy+2,2,2,c);R(3,cy+4,2,2,c);R(11,cy+4,2,2,c)};
+ const up=mkTile((x,R)=>{cb(R);chev(R,2,'#74d0f0');chev(R,8,'#3f8fd0')});
+ const rot=(src,deg)=>{const c=document.createElement('canvas');c.width=16;c.height=16;const x=c.getContext('2d');x.translate(8,8);x.rotate(deg*Math.PI/180);x.translate(-8,-8);x.drawImage(src,0,0);return c};
+ TIL['^']=up;TIL['v']=rot(up,180);TIL['<']=rot(up,270);TIL['>']=rot(up,90)}
+TIL['Yo']=TIL['_'];TIL['Zo']=TIL['_'];
+}
+const SOLID={'T':1,'w':1,'F':1,'S':1,'r':1,'R':1,'B':1,'P':1,'W':1,'o':1,'x':1,'#':1,'k':1,'p':1,'h':1,'e':1,'a':1,'n':1};
+// 'H','Y','Z' handled specially (gates open via flags); 'L' = ledge (down only)
+
+//------------------------------------------------------------ maps
+const MAPS={
+mosshollow:{out:1,mus:'over',edges:{N:{m:'route1',d:-1}},
+g:['TTTTTTTT-TTTTTTTTT',
+   'T..f....-....f...T',
+   'T.RRR...-...RRR..T',
+   'T.RRR...-...RRR..T',
+   'T.WoW...-...WoW..T',
+   'T.WDW...-...WDW..T',
+   'T.......-........T',
+   'T..S....-...f....T',
+   'T..------------..T',
+   'T.........BBBBBB.T',
+   'T.f.......BBBBBB.T',
+   'T.........WWDWWW.T',
+   'T.f..............T',
+   'TTTTTTTTTTTTTTTTTT'],
+warps:[{x:3,y:5,m:'home',tx:4,ty:6,dir:'u'},{x:13,y:5,m:'house1',tx:4,ty:6,dir:'u'},{x:12,y:11,m:'lab',tx:5,ty:7,dir:'u'}],
+npcs:[{x:8,y:1,pal:'aide',dir:'d',dscript:'aide'},
+ {x:9,y:12,pal:'rook',dir:'r',req:'gotstarter',not:'rival1',tr:{name:'RIVAL ROOK',rival:1,m:300,sight:4,f:'rival1',b:["ROOK: There you are! Show me that starter isn't wasted on you!"],a:["ROOK: Tch. Lucky ember. I'm off to flatten the THORNBURY gym."],win:'rival1win'}},
+ {x:5,y:10,pal:'kid',dir:'d',mv:1,d:['Wild KIN hide in tall grass. Walk in, get jumped. Fun!']}],
+trig:[{x:8,y:2,s:'aide',not:'snares'}],
+signs:{'3,7':'MOSSHOLLOW VILLAGE - Where journeys take root.'},
+items:[],exam:[],enc:null},
+
+home:{out:0,mus:'over',
+g:['##########','#hh____ee#','#________#','#__aa____#','#________#','#________#','#___m____#','####d#####'],
+warps:[{x:4,y:7,m:'mosshollow',tx:3,ty:6,dir:'d'}],
+npcs:[{x:6,y:4,pal:'mom',dir:'d',mv:1,dscript:'mom'}],
+exam:[{x:7,y:1,s:'bed'},{x:8,y:1,s:'bed'}],trig:[],signs:{},items:[],enc:null},
+
+house1:{out:0,mus:'over',
+g:['##########','#hh____hh#','#________#','#__aa____#','#________#','#________#','#________#','####d#####'],
+warps:[{x:4,y:7,m:'mosshollow',tx:13,ty:6,dir:'d'}],
+npcs:[{x:6,y:3,pal:'oldman',dir:'d',mv:1,d:["Three badges shine in Solvane: BRIAR's BLOOM, BRAVA's CINDER, BRONTE's SURGE.",'Earn all three, then knock on the AURELIA gate up at STORMREACH.']}],
+exam:[],trig:[],signs:{},items:[],enc:null},
+
+lab:{out:0,mus:'over',
+g:['############','#hhhhhhhhhh#','#__________#','#_____aaa__#','#__________#','#__________#','#__________#','#__________#','#####d######'],
+warps:[{x:5,y:8,m:'mosshollow',tx:12,ty:12,dir:'d'}],
+npcs:[{x:3,y:4,pal:'prof',dir:'r',dscript:'prof'}],
+exam:[{x:6,y:3,s:'orb0'},{x:7,y:3,s:'orb1'},{x:8,y:3,s:'orb2'}],
+trig:[],signs:{},items:[],enc:null},
+
+route1:{out:1,mus:'over',edges:{S:{m:'mosshollow',d:1},N:{m:'thornbury',d:4}},
+g:['TTTTTT-TTTTTTT',
+   'T.gg..-...gg.T',
+   'T.gg..-...gg.T',
+   'T.gg..-..f...T',
+   'T.....-......T',
+   'T..f..-......T',
+   'Tgg...-..gg..T',
+   'Tgg.S.-..gg..T',
+   'Tgg...-..gg..T',
+   'TLLLLL-..LLLLT',
+   'T.....-......T',
+   'T.gg..-..gg..T',
+   'T.gg..-..gg..T',
+   'T.f...-......T',
+   'T.....--.....T',
+   'T..gg..-.gg..T',
+   'T..gg..-.gg..T',
+   'T......-.f...T',
+   'TLLLL..-.LLLLT',
+   'T......-.....T',
+   'T.gg...-..gg.T',
+   'T.gg...-..gg.T',
+   'T...f..-.....T',
+   'T......-.....T',
+   'T.S....-.....T',
+   'TTTTTTT-TTTTTT'],
+warps:[],
+npcs:[{x:10,y:13,pal:'kid',dir:'l',tr:{name:'YOUNGSTER TODD',team:[[7,4]],m:120,sight:4,f:'tr_r1a',b:['My SCURRIT is the fastest thing on ROUTE 1!'],a:['It zoomed right past me...']}},
+ {x:4,y:22,pal:'lass',dir:'r',tr:{name:'LASS MIA',team:[[9,3],[13,4]],m:100,sight:3,f:'tr_r1b',b:['My garden friends and I will not lose!'],a:['Oh! My poor petals!']}}],
+trig:[],signs:{'4,7':'ROUTE 1 - North: THORNBURY TOWN.','2,24':'Tall grass hides wild KIN! Carry SNARES.'},
+items:[{x:2,y:4,it:'snare',q:3,f:'it_r1a'},{x:10,y:17,it:'tonic',q:1,f:'it_r1b'}],
+exam:[],
+enc:{m:[[7,2,4,30],[9,2,4,30],[13,2,4,20],[23,3,3,10],[11,2,4,10]],
+     d:[[7,2,4,35],[9,2,4,30],[11,2,4,25],[13,2,4,10]],
+     n:[[19,2,4,40],[7,2,4,25],[11,2,4,20],[21,3,5,15]]}},
+
+thornbury:{out:1,mus:'over',edges:{S:{m:'route1',d:-4},E:{m:'route2',d:-3}},
+g:['TTTTTTTTTTTTTTTTTTTTTT',
+   'T..f.................T',
+   'T.RRRR...BBBB...PPPPPT',
+   'T.RRRR...BBBB...PPPPPT',
+   'T.WDWW...WWDW...WWDWWT',
+   'T..............S.....T',
+   'T..f......f..........T',
+   'T....................T',
+   'T---------------------',
+   'T.........-..........T',
+   'T..S......-...f......T',
+   'T.f.......-..........T',
+   'T.........-....f.....T',
+   'T.........-..........T',
+   'T.........-..........T',
+   'TTTTTTTTTT-TTTTTTTTTTT'],
+warps:[{x:3,y:4,m:'haven1',tx:5,ty:6,dir:'u'},{x:11,y:4,m:'shop1',tx:4,ty:6,dir:'u'},{x:18,y:4,m:'gym1',tx:6,ty:11,dir:'u'}],
+npcs:[{x:13,y:6,pal:'kid',dir:'d',mv:1,d:['Two NEW Kin types were just discovered: ALLOY and UMBRAL!','Gramps says the old type chart is obsolete. Wild times!']},
+ {x:5,y:12,pal:'oldman',dir:'d',mv:1,d:['Different KIN prowl by morning, day and night.','The clock matters, kid. Some only ever show after dark.']},
+ {x:16,y:6,pal:'lass',dir:'d',mv:1,d:['Leader BRIAR grows FLORA Kin.','EMBER or GALE moves will prune her right down!']},
+ {x:15,y:11,pal:'vendor',dir:'d',time:'n',dscript:'vendor'}],
+trig:[],
+signs:{'3,10':'THORNBURY TOWN - The hedge and hearth town.','15,5':'THORNBURY KIN GYM - Leader BRIAR: The Budding Wall.'},
+labels:[{x:3,y:3,t:'HAVEN'},{x:11,y:3,t:'MART'},{x:18,y:3,t:'GYM'}],
+items:[],exam:[],enc:null},
+
+haven1:{out:0,mus:'over',
+g:['############','#_________p#','#__________#','#__kkkkkk__#','#__________#','#__________#','#__________#','#####d######'],
+warps:[{x:5,y:7,m:'thornbury',tx:3,ty:5,dir:'d'}],
+npcs:[{x:5,y:2,pal:'nurse',dir:'d',dscript:'nurse'}],
+exam:[{x:10,y:1,s:'pc'}],trig:[],signs:{},items:[],enc:null},
+
+shop1:{out:0,mus:'over',
+g:['##########','#h_______#','#________#','#kkkk____#','#________#','#________#','#________#','####d#####'],
+warps:[{x:4,y:7,m:'thornbury',tx:11,ty:5,dir:'d'}],
+npcs:[{x:2,y:2,pal:'clerk',dir:'d',dscript:'shop1'}],
+exam:[],trig:[],signs:{},items:[],enc:null},
+
+gym1:{out:0,mus:'gym',gates:1,
+g:['##############',
+   '#__n______n__#',
+   '#HHHHHHZHHHHH#',
+   '#__________U_#',
+   '#HHHHYHHHHHHH#',
+   '#____________#',
+   '#HHHHH_HHHHHH#',
+   '#____________#',
+   '#HHHHHHHHHH_H#',
+   '#____________#',
+   '#uHHHHHHHHHHH#',
+   '#____________#',
+   '#_____d______#',
+   '##############'],
+warps:[{x:6,y:12,m:'thornbury',tx:18,ty:5,dir:'d'}],
+npcs:[{x:7,y:1,pal:'briar',dir:'d',tr:{name:'LEADER BRIAR',team:[[13,10],[14,12]],m:1200,sight:0,f:'tr_briar',win:'badge1',b:['BRIAR: Welcome to the Budding Wall.','My garden does not wilt. Show me your roots!'],a:['Pruned! Fair and square.']}},
+ {x:9,y:9,pal:'lass',dir:'l',tr:{name:'GARDENER IVY',team:[[11,8],[13,9]],m:240,sight:5,f:'tr_ivy',b:['Only green thumbs pass me!'],a:['Composted...']}}],
+trig:[],signs:{},items:[],exam:[],enc:null},
+
+route2:{out:1,mus:'over',edges:{W:{m:'thornbury',d:3}},
+g:['TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+   'T.......................rrrrrT',
+   'T..ggg......ggggg.......rrrrrT',
+   'T..ggg......ggggg.......rrrrrT',
+   'T..ggg..................rrCrrT',
+   '---------------------------..T',
+   'T...gg.........gggg....S.....T',
+   'T...gg.........gggg..........T',
+   'T....f.......................T',
+   'T............................T',
+   'T............................T',
+   'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'],
+warps:[{x:26,y:4,m:'cave',tx:2,ty:8,dir:'r'}],
+npcs:[{x:2,y:6,pal:'oldman',dir:'d',time:'m',dscript:'keeper'},
+ {x:10,y:4,pal:'kid',dir:'d',tr:{name:'BUG KID NILS',team:[[11,6],[11,6],[15,7]],m:170,sight:2,f:'tr_r2a',b:['Bugs! Bugs! BUGS!'],a:['They all curled up...']}},
+ {x:17,y:7,pal:'lass',dir:'u',tr:{name:'PICNICKER ROSA',team:[[28,7],[13,7]],m:200,sight:3,f:'tr_r2b',b:['You stepped on my picnic blanket!'],a:['And now my juice is spilled too.']}},
+ {x:22,y:4,pal:'hiker',dir:'d',tr:{name:'HIKER BORIS',team:[[17,8],[17,8]],m:280,sight:2,f:'tr_r2c',b:['These boulders are my babies!'],a:['Rocked and rolled...']}}],
+trig:[],
+signs:{'23,6':'EAST: HOLLOW CAVE - Mind the dark. - The Gloam? Never heard of them. -MGMT'},
+items:[{x:6,y:8,it:'juneberry',q:1,f:'it_r2a'},{x:26,y:9,it:'quickquill',q:1,f:'it_r2b'}],
+exam:[],
+enc:{m:[[9,5,7,25],[13,5,7,25],[15,5,7,25],[23,5,7,5],[7,5,7,20]],
+     d:[[15,5,8,30],[11,5,7,20],[13,5,7,25],[9,5,7,25]],
+     n:[[19,5,8,35],[21,5,8,25],[27,5,8,25],[7,5,7,15]]}},
+
+cave:{out:0,mus:'cave',
+g:['xxxxxxxxxxxxxxxxxxxx',
+   'xxxxxxxxqqqqqqqqqqqx',
+   'xxxxxxxxqqqqqqqqqqqx',
+   'xxxxxxxxqqqxxxxxxxxx',
+   'xxxxxxxxqqqxxxxxxxxx',
+   'xxxxxxqqqqqqqxxxxxxx',
+   'xqqqqxqqqqqqqxxxxxxx',
+   'xqqqqxqqqqqqqqqqqqdx',
+   'xdqqqqqqqqqqqxxxxxxx',
+   'xqqqqxqqqqqqqxxxxxxx',
+   'xqqqqxqqqqqqqxxxxxxx',
+   'xxxxxxxqqqqqqxxxxxxx',
+   'xxxxxxxqqqqqqqqqqxxx',
+   'xxxxxxxqqqqqqqqqqxxx',
+   'xxxxxxxxxxxxxxxxxxxx',
+   'xxxxxxxxxxxxxxxxxxxx'],
+warps:[{x:1,y:8,m:'route2',tx:26,ty:5,dir:'d'},{x:18,y:7,m:'route3',tx:2,ty:7,dir:'r'}],
+npcs:[{x:3,y:6,pal:'hiker',dir:'d',tr:{name:'HIKER CLINT',team:[[17,9],[17,10]],m:320,sight:3,f:'tr_cva',b:['I apologize to every pebble I step on. You should too!'],a:['Sorry, pebbles. I let you down.']}},
+ {x:9,y:4,pal:'grunt',dir:'d',not:'gloamgone',tr:{name:'GLOAM GRUNT',team:[[19,9],[27,9]],m:300,sight:2,f:'tr_cvb',b:['The GLOAM SYNDICATE will snuff out Solvane, light by light!'],a:['My shift is SO over.']}},
+ {x:14,y:7,pal:'grunt',dir:'l',not:'gloamgone',tr:{name:'GLOAM GRUNT',team:[[19,10]],m:300,sight:4,f:'tr_cvc',b:['No witnesses past this point!'],a:['Witness... protection?']}},
+ {x:15,y:1,pal:'officer',dir:'l',not:'gloamgone',tr:{name:'OFFICER VESPER',team:[[27,11],[19,12]],m:600,sight:4,f:'tr_vesper',win:'gloamwin',b:['VESPER: These ALLOY CORES will fuel our eclipse engine.','You have seen far too much, little Keeper.'],a:['Impossible...!']}},
+ {x:17,y:2,pal:'miner',dir:'d',dscript:'miner'}],
+trig:[],signs:{},
+items:[{x:16,y:12,it:'primesnare',q:1,f:'it_cva'},{x:12,y:13,it:'irontalisman',q:1,f:'it_cvb'},{x:3,y:10,it:'bitterroot',q:1,f:'it_cvc'}],
+exam:[],
+enc:{m:[[17,7,10,40],[27,7,10,30],[29,8,10,12],[22,8,10,18]],
+     d:[[17,7,10,40],[27,7,10,30],[29,8,10,12],[22,8,10,18]],
+     n:[[22,8,11,35],[27,7,10,30],[17,7,10,23],[29,8,10,12]]}},
+
+route3:{out:1,mus:'over',edges:{E:{m:'cindervale',d:2}},
+g:['TTTTTTTTTTTTTTTTTTTTTTTTTT',
+   'T...f....gg..T....gg.....T',
+   'T...S....gg..T.f..gg.....T',
+   'T........gg..T....gg.....T',
+   'T............T...........T',
+   'T..gg........T.....gg....T',
+   'T............T..----------',
+   'TC---------------.gg.....T',
+   'T..www..gg...T...gg......T',
+   'T..www..gg...T...gg......T',
+   'T....f.......T...........T',
+   'TTTTTTTTTTTTTTTTTTTTTTTTTT'],
+warps:[{x:1,y:7,m:'cave',tx:17,ty:7,dir:'l'}],
+npcs:[{x:9,y:4,pal:'kid',dir:'d',tr:{name:'BIRD TAMER SKY',team:[[9,11],[21,12]],m:380,sight:3,f:'tr_r3a',b:['My birds own this sky!'],a:['Grounded. All of us.']}},
+ {x:18,y:8,pal:'kid',dir:'u',tr:{name:'SCHOOL KID PIP',team:[[25,12],[15,11]],m:360,sight:2,f:'tr_r3b',b:['Pop quiz: can you beat me? Show your work!'],a:['I got an F in battling...']}}],
+trig:[{x:13,y:7,s:'rival2',not:'rival2'}],
+signs:{'4,2':'ROUTE 3 - East: CINDERVALE TOWN.'},
+items:[{x:4,y:1,it:'supertonic',q:1,f:'it_r3a'},{x:21,y:9,it:'powerband',q:1,f:'it_r3b'}],
+exam:[],
+enc:{m:[[25,10,13,30],[28,10,13,22],[9,10,12,18],[15,10,12,15],[13,10,12,15]],
+     d:[[25,10,13,30],[28,10,13,22],[9,10,12,18],[15,10,12,15],[13,10,12,15]],
+     n:[[19,10,13,28],[21,10,13,22],[27,10,13,20],[25,10,13,15],[28,10,13,15]]}},
+
+cindervale:{out:1,mus:'over',edges:{W:{m:'route3',d:-2},N:{m:'route4',d:0}},
+g:['TTTTTTTTT-TTTTTTTTTT',
+   'T...FFFF.-.FFFF....T',
+   'T.........S........T',
+   'T.RRRR...BBBB.PPPPPT',
+   'T.RRRR...BBBB.PPPPPT',
+   'T.WDWW...WWDW.WWDWWT',
+   'T..................T',
+   'T.....f.......S....T',
+   '----------------...T',
+   'T..................T',
+   'T....f.......f.....T',
+   'T..S...............T',
+   'T..................T',
+   'T..................T',
+   'T..................T',
+   'TTTTTTTTTTTTTTTTTTTT'],
+warps:[{x:3,y:5,m:'haven2',tx:5,ty:6,dir:'u'},{x:11,y:5,m:'shop2',tx:4,ty:6,dir:'u'},{x:16,y:5,m:'gym2',tx:6,ty:11,dir:'u'}],
+npcs:[{x:4,y:6,pal:'guard',dir:'d',d:['STORMREACH lies north now, up past ROUTE 4.','Leader BRONTE guards the road to the AURELIA gate.']},
+ {x:13,y:10,pal:'oldman',dir:'d',mv:1,d:['Legend says NOCTELK walks the three roads, but only at night.','It never stays. Strike true, or snare it before it slips away.']},
+ {x:6,y:12,pal:'kid',dir:'d',mv:1,d:['Once I saw a KIN that GLEAMED like treasure!','One in a thousand, gramps says. Maybe one in 64...']}],
+trig:[],
+signs:{'10,2':'NORTH: ROUTE 4 to STORMREACH and the third gym.','14,7':'CINDERVALE KIN GYM - Leader BRAVA: The Wildfire Waltz.','3,11':'CINDERVALE TOWN - Warm hearths, warmer hearts.'},
+labels:[{x:3,y:4,t:'HAVEN'},{x:11,y:4,t:'MART'},{x:16,y:4,t:'GYM'}],
+items:[],exam:[],enc:null},
+
+haven2:{out:0,mus:'over',
+g:['############','#_________p#','#__________#','#__kkkkkk__#','#__________#','#__________#','#__________#','#####d######'],
+warps:[{x:5,y:7,m:'cindervale',tx:3,ty:6,dir:'d'}],
+npcs:[{x:5,y:2,pal:'nurse',dir:'d',dscript:'nurse'}],
+exam:[{x:10,y:1,s:'pc'}],trig:[],signs:{},items:[],enc:null},
+
+shop2:{out:0,mus:'over',
+g:['##########','#h_______#','#________#','#kkkk____#','#________#','#________#','#________#','####d#####'],
+warps:[{x:4,y:7,m:'cindervale',tx:11,ty:6,dir:'d'}],
+npcs:[{x:2,y:2,pal:'clerk',dir:'d',dscript:'shop2'}],
+exam:[],trig:[],signs:{},items:[],enc:null},
+
+gym2:{out:0,mus:'gym',
+g:['##############',
+   '#____________#',
+   '#iriirriiiiri#',
+   '#iiiiiiriiiii#',
+   '#riiriiiiiiii#',
+   '#iiiiiiiiriii#',
+   '#iiiiiiiiiiir#',
+   '#iiiiiriiiiii#',
+   '#iiiiiiiiirii#',
+   '#iiriiiiriiii#',
+   '#iiiiiiiiiiii#',
+   '#____________#',
+   '#_____d______#',
+   '##############'],
+warps:[{x:6,y:12,m:'cindervale',tx:16,ty:6,dir:'d'}],
+npcs:[{x:6,y:1,pal:'brava',dir:'d',tr:{name:'LEADER BRAVA',team:[[29,14],[2,16]],m:1600,sight:0,f:'tr_brava',win:'badge2',b:['BRAVA: Welcome to the Wildfire Waltz!','Mind the waxed floor. Now... shall we dance?'],a:['Burned out! What a lead partner you are.']}},
+ {x:3,y:11,pal:'kid',dir:'r',tr:{name:'BURNER COLE',team:[[29,13]],m:420,sight:4,f:'tr_g2a',b:['Feel the heat!'],a:['I flamed out.']}},
+ {x:10,y:11,pal:'lass',dir:'l',tr:{name:'BURNER TESSA',team:[[1,12],[29,13]],m:420,sight:4,f:'tr_g2b',b:['This floor? I waxed it myself!'],a:['Slipped up...']}}],
+trig:[],signs:{},items:[],exam:[],enc:null},
+
+route4:{out:1,mus:'over',edges:{S:{m:'cindervale',d:0},N:{m:'stormreach',d:0}},
+g:['TTTTTT-TTTTTTT',
+   'T.gg......gg.T',
+   'T.gg......gg.T',
+   'T...f....f...T',
+   'T.gg......gg.T',
+   'T.gg......gg.T',
+   'T............T',
+   'T...gg..gg...T',
+   'T...gg..gg...T',
+   'T............T',
+   'T..f......f..T',
+   'T.S..........T',
+   'T............T',
+   'TTTTTTTTT-TTTT'],
+warps:[],
+npcs:[{x:3,y:6,pal:'kid',dir:'d',tr:{name:'SPARKY LIV',team:[[15,16],[16,17]],m:340,sight:3,f:'tr_r4a',b:['Static cling? I call it a hug!'],a:['Grounded out...']}},
+ {x:10,y:9,pal:'hiker',dir:'u',tr:{name:'RANGER NOLAN',team:[[10,18],[31,17]],m:400,sight:3,f:'tr_r4b',b:['The storms up here breed strong KIN.'],a:['Blown clean away.']}}],
+trig:[],
+signs:{'2,11':'ROUTE 4 - North: STORMREACH. Mind the live wires.'},
+items:[{x:6,y:3,it:'apexsnare',q:1,f:'it_r4a'},{x:2,y:9,it:'supertonic',q:1,f:'it_r4b'}],
+exam:[],
+enc:{m:[[15,16,19,30],[9,16,19,25],[7,16,18,20],[16,18,20,15],[31,18,20,10]],
+     d:[[15,16,19,30],[9,16,19,25],[16,18,20,20],[31,18,20,15],[27,17,19,10]],
+     n:[[19,17,20,30],[27,17,20,25],[16,18,21,20],[31,19,22,15],[15,16,19,10]]}},
+
+stormreach:{out:1,mus:'over',edges:{S:{m:'route4',d:0}},
+g:['TTTTTTTTTTTTTTTTTT',
+   'T...FFF.FF.FFF...T',
+   'T......S.........T',
+   'T................T',
+   'T.RRRR..BBBB.PPPPT',
+   'T.RRRR..BBBB.PPPPT',
+   'T.WDWW..WWDW.WWDWT',
+   'T................T',
+   'T.....f....f.....T',
+   'T................T',
+   'T......S.........T',
+   'T................T',
+   'T................T',
+   'TTTTTT-TTTTTTTTTTT'],
+warps:[{x:3,y:6,m:'haven3',tx:5,ty:6,dir:'u'},{x:10,y:6,m:'shop3',tx:4,ty:6,dir:'u'},{x:15,y:6,m:'gym3',tx:6,ty:11,dir:'u'}],
+npcs:[{x:7,y:3,pal:'guard',dir:'d',d:['The AURELIA gate is sealed tight.','Eight more HAVENS wait beyond. Next chapter, KEEPER!']},
+ {x:5,y:9,pal:'lass',dir:'d',mv:1,d:['Leader BRONTE rides the current itself.','Bring STONE moves - VOLT fizzles on solid ground!']},
+ {x:12,y:9,pal:'kid',dir:'d',mv:1,d:['A new KIN, ARCLEON, prowls ROUTE 4!','Storms trail it like a puppy.']}],
+trig:[],
+signs:{'7,2':'AURELIA GATE - SEALED. The AURELIA region waits beyond... next season!','7,10':'STORMREACH - The frontier under the live sky.'},
+labels:[{x:3,y:5,t:'HAVEN'},{x:10,y:5,t:'MART'},{x:15,y:5,t:'GYM'}],
+items:[],exam:[],enc:null},
+
+haven3:{out:0,mus:'over',
+g:['############','#_________p#','#__________#','#__kkkkkk__#','#__________#','#__________#','#__________#','#####d######'],
+warps:[{x:5,y:7,m:'stormreach',tx:3,ty:7,dir:'d'}],
+npcs:[{x:5,y:2,pal:'nurse',dir:'d',dscript:'nurse'}],
+exam:[{x:10,y:1,s:'pc'}],trig:[],signs:{},items:[],enc:null},
+
+shop3:{out:0,mus:'over',
+g:['##########','#h_______#','#________#','#kkkk____#','#________#','#________#','#________#','####d#####'],
+warps:[{x:4,y:7,m:'stormreach',tx:10,ty:7,dir:'d'}],
+npcs:[{x:2,y:2,pal:'clerk',dir:'d',dscript:'shop3'}],
+exam:[],trig:[],signs:{},items:[],enc:null},
+
+gym3:{out:0,mus:'gym',
+g:['##############',
+   '#_n________n_#',
+   '###>>>_#######',
+   '###^##########',
+   '###^##########',
+   '###^##########',
+   '###^##########',
+   '###^##########',
+   '###^##########',
+   '#____________#',
+   '#____________#',
+   '#____________#',
+   '#_____d______#',
+   '##############'],
+warps:[{x:6,y:12,m:'stormreach',tx:15,ty:7,dir:'d'}],
+npcs:[{x:6,y:1,pal:'bronte',dir:'d',tr:{name:'LEADER BRONTE',team:[[15,18],[16,20],[31,23]],m:2000,sight:0,f:'tr_bronte',win:'badge3',b:['BRONTE: Welcome to the live current!','Stand still and the floor will move you. Ready?'],a:['Discharged! A shocking run, KEEPER.']}},
+ {x:2,y:10,pal:'kid',dir:'r',tr:{name:'AMP COLT',team:[[15,17],[16,18]],m:460,sight:4,f:'tr_g3a',b:['Feel that buzz?'],a:['Short-circuited.']}},
+ {x:10,y:10,pal:'lass',dir:'l',tr:{name:'COIL DANA',team:[[16,19]],m:460,sight:4,f:'tr_g3b',b:['You wont find the leader on foot!'],a:['Grounded.']}}],
+trig:[],signs:{},items:[],exam:[],enc:null}
+};
+const DEXN=SP.length-1; // the Kindex grows automatically as species are appended
+
+//------------------------------------------------------------ core engine: state, modes, input
+let G=null,cv=null,ctx=null,INGAME=false;
+const MODES=[];const EVOQ=[];
+function pushM(m){MODES.push(m)}
+function remM(m){const i=MODES.indexOf(m);if(i>=0)MODES.splice(i,1)}
+function topM(){return MODES[MODES.length-1]}
+const KEYS={},KEYP={};
+function setKey(k,down){if(down){if(!KEYS[k])KEYP[k]=1;KEYS[k]=1}else{KEYS[k]=0}}
+function kp(k){if(KEYP[k]){KEYP[k]=0;return 1}return 0}
+const DV={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]};
+const OPP={u:'d',d:'u',l:'r',r:'l'};
+const CURDIR={'^':'u','v':'d','<':'l','>':'r'}; // electric "current" floor tiles: drift this way
+
+function newGame(name){G={v:1,name:(name||'RIN').toUpperCase().slice(0,7),map:'home',x:4,y:4,dir:'d',
+ party:[],vault:[],bag:{},money:1500,flags:{},badges:[],
+ time:8*60,day:0,steps:0,lastGift:-1,rival:3,
+ opts:{txt:1,mus:1,sfx:1},seen:{},caught:{},
+ roamer:{on:0,map:'route1',hp:-1,st:0,slp:0,beat:0,caught:0},
+ heal:{m:'home',x:4,y:4}};
+ resetNpcs();INGAME=true}
+function setF(f){G.flags[f]=1}
+function hasF(f){return !!G.flags[f]}
+function phase(){const h=fl(G.time/60)%24;return (h>=4&&h<10)?'m':(h>=10&&h<20)?'d':'n'}
+function tickTime(){G.time+=1/60;if(G.time>=1440){G.time-=1440;G.day++}}
+function clockStr(){const t=fl(G.time),h=fl(t/60)%24,m=t%60;return (h<10?'0':'')+h+':'+(m<10?'0':'')+m}
+
+//------------------------------------------------------------ save / load
+function saveData(){return JSON.stringify({v:1,g:G})}
+function doSave(){try{localStorage.setItem('faunwild1',saveData());return true}catch(e){return false}}
+function hasSave(){try{return !!localStorage.getItem('faunwild1')}catch(e){return false}}
+function applySave(o){if(!o||o.v!==1||!o.g||!o.g.party)return false;G=o.g;if(!G.roamer)G.roamer={on:0,map:'route1',hp:-1,st:0,slp:0,beat:0,caught:0};resetNpcs();INGAME=true;return true}
+function loadSave(){try{const s=localStorage.getItem('faunwild1');if(!s)return false;return applySave(JSON.parse(s))}catch(e){return false}}
+function exportCode(){try{return 'FWN1.'+btoa(unescape(encodeURIComponent(saveData())))}catch(e){return''}}
+function importCode(s){try{s=(s||'').trim();if(s.indexOf('FWN1.')!==0)return false;return applySave(JSON.parse(decodeURIComponent(escape(atob(s.slice(5))))))}catch(e){return false}}
+function resetNpcs(){for(const k in MAPS){for(const n of MAPS[k].npcs){if(n.x0===undefined){n.x0=n.x;n.y0=n.y}n.x=n.x0;n.y=n.y0;n.fdir=n.dir;n.px=0;n.py=0;n.wt=30+ri(60)}}}
+
+//------------------------------------------------------------ bag
+function addItem(id,q){G.bag[id]=(G.bag[id]||0)+(q||1)}
+function remItem(id,q){G.bag[id]=(G.bag[id]||0)-(q||1);if(G.bag[id]<=0)delete G.bag[id]}
+function itemCount(id){return G.bag[id]||0}
+function bagList(){return BAGORDER.filter(id=>G.bag[id]>0)}
+
+//------------------------------------------------------------ monsters
+function expFor(l){return l*l*l}
+function movesUpTo(id,lv){const ls=SP[id].mv.filter(e=>e[0]<=lv).map(e=>e[1]);const u=[];for(const m of ls)if(!u.includes(m))u.push(m);return u.slice(-4)}
+function makeMon(id,lv,o){o=o||{};const dv={hp:ri(16),at:ri(16),df:ri(16),sc:ri(16),sp:ri(16)};
+ const m={id,lv,exp:expFor(lv),dv,st:0,slp:0,fr:o.fr!=null?o.fr:70,item:o.item||0,gleam:o.gleam?1:0};
+ m.mv=movesUpTo(id,lv).map(x=>({id:x,pp:MV[x].pp}));m.hp=0;m.hp=maxHP(m);return m}
+function stat(m,k){return fl((SP[m.id].bs[k]+m.dv[k])*2*m.lv/100)+5}
+function maxHP(m){return fl((SP[m.id].bs.hp+m.dv.hp)*2*m.lv/100)+m.lv+10}
+function healMon(m){m.hp=maxHP(m);m.st=0;m.slp=0;for(const v of m.mv)v.pp=MV[v.id].pp}
+function healParty(){for(const m of G.party)healMon(m)}
+function addSeen(id){G.seen[id]=1}
+function addCaught(id){G.seen[id]=1;G.caught[id]=1}
+function partyAlive(){let n=0;for(const m of G.party)if(m.hp>0)n++;return n}
+function firstAlive(){for(let i=0;i<G.party.length;i++)if(G.party[i].hp>0)return i;return -1}
+function frHearts(m){return fl(m.fr/52)}
+
+//------------------------------------------------------------ sprites
+const SPRC={};
+function sprCanvas(px,pal,key){if(key&&SPRC[key])return SPRC[key];
+ const c=document.createElement('canvas');c.width=16;c.height=16;const x=c.getContext('2d');
+ const rows=px.split('|');
+ for(let ry=0;ry<16;ry++){let row=rows[ry]||'';if(row.length===8)row+=row.split('').reverse().join('');
+  for(let cx=0;cx<16;cx++){const cc=row[cx];if(cc&&cc!=='.'){x.fillStyle=pal[+cc-1]||'#000';x.fillRect(cx,ry,1,1)}}}
+ if(key)SPRC[key]=c;return c}
+function flipC(c,key){if(key&&SPRC[key])return SPRC[key];const f=document.createElement('canvas');f.width=16;f.height=16;const x=f.getContext('2d');x.translate(16,0);x.scale(-1,1);x.drawImage(c,0,0);if(key)SPRC[key]=f;return f}
+function gleamPal(pal){return pal.map(h=>{const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);const f2=v=>('0'+v.toString(16)).slice(-2);return '#'+f2(g)+f2(b)+f2(r)})}
+function monSpr(id,gl){const s=SP[id];return sprCanvas(s.px,gl?gleamPal(s.pal):s.pal,'m'+id+(gl?'g':''))}
+function heroSpr(dir,fr){const f=fr?2:1;
+ if(dir==='d')return sprCanvas(HERO['d'+f],HEROPAL,'hd'+f);
+ if(dir==='u')return sprCanvas(HERO['u'+f],HEROPAL,'hu'+f);
+ const base=sprCanvas(HERO['s'+f],HEROPAL,'hs'+f);
+ return dir==='l'?base:flipC(base,'hsr'+f)}
+function npcSpr(pal,dir){const p=PALS[pal]||PALS.kid;
+ if(dir==='d')return sprCanvas(NPCSPR.d,p,'n_'+pal+'_d');
+ if(dir==='u')return sprCanvas(NPCSPR.u,p,'n_'+pal+'_u');
+ const base=sprCanvas(NPCSPR.s,p,'n_'+pal+'_s');
+ return dir==='l'?base:flipC(base,'n_'+pal+'_sr')}
+
+//------------------------------------------------------------ text & ui
+function drawText(s,x,y,col){s=(''+s).toUpperCase();ctx.fillStyle=col||'#282828';let cx=x;
+ for(const c of s){if(c===' '){cx+=6;continue}const g=GL[c];if(g)for(let r=0;r<7;r++){const b=g[r];for(let k=0;k<5;k++)if(b&(16>>k))ctx.fillRect(cx+k,y+r,1,1)}cx+=6}return cx}
+function drawTextBig(s,x,y,sc,col){s=(''+s).toUpperCase();ctx.fillStyle=col||'#282828';let cx=x;
+ for(const c of s){if(c===' '){cx+=6*sc;continue}const g=GL[c];if(g)for(let r=0;r<7;r++){const b=g[r];for(let k=0;k<5;k++)if(b&(16>>k))ctx.fillRect(cx+k*sc,y+r*sc,sc,sc)}cx+=6*sc}}
+function ctext(s,y,col){drawText(s,fl((W-(''+s).length*6)/2),y,col)}
+function frame(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(x,y,w,1);ctx.fillRect(x,y+h-1,w,1);ctx.fillRect(x,y,1,h);ctx.fillRect(x+w-1,y,1,h)}
+function panel(x,y,w,h){ctx.fillStyle='#f8f8f0';ctx.fillRect(x,y,w,h);frame(x,y,w,h,'#202020');frame(x+2,y+2,w-4,h-4,'#98a098')}
+function hpbar(x,y,w,cur,max){const f=clamp(cur/Math.max(1,max),0,1);ctx.fillStyle='#404040';ctx.fillRect(x,y,w,4);ctx.fillStyle='#e8e8e0';ctx.fillRect(x+1,y+1,w-2,2);const fw=fl((w-2)*f);ctx.fillStyle=f>.5?'#30b850':f>.21?'#e8a020':'#e04848';if(fw>0)ctx.fillRect(x+1,y+1,fw,2)}
+function wrap(s,n){const out=[''];for(const w of (''+s).split(' ')){const L=out[out.length-1];if(L&&(L.length+1+w.length)>n)out.push(w);else out[out.length-1]=L?L+' '+w:w}return out}
+
+//------------------------------------------------------------ script tasks
+const say=(...tx)=>({k:'say',tx:tx.flat()});
+const ask=(tx,opts,cancel)=>({k:'ask',tx:Array.isArray(tx)?tx:[tx],opts,cancel});
+const wait=f=>({k:'wait',f});
+const doT=fn=>({k:'do',fn});
+const sfxT=n=>({k:'sfx',n});
+function startScript(gen,onDone){const sm={gen,onDone,val:undefined,running:false};
+ sm.mode={tr:true,u(){},d(){},sm};pushM(sm.mode);pump(sm)}
+function runScript(genFn,onDone){startScript(genFn(),onDone)}
+function pump(sm){if(sm.running)return;sm.running=true;
+ for(;;){let r;try{r=sm.gen.next(sm.val)}catch(e){if(typeof console!=='undefined')console.error('script error',e);r={done:true}}
+  sm.val=undefined;
+  if(r.done){remM(sm.mode);sm.running=false;if(sm.onDone)sm.onDone(r.value);return}
+  let sync=true,fin=false;
+  try{execTask(r.value,res=>{sm.val=res;fin=true;if(!sync){sm.running=false;pump(sm)}})}
+  catch(e){if(typeof console!=='undefined')console.error('task error',e,r.value);fin=true}
+  sync=false;
+  if(!fin){sm.running=false;return}}}
+function execTask(t,cb){if(!t){cb();return}switch(t.k){
+ case 'say':pushM(DialogMode(t.tx,()=>cb()));break;
+ case 'ask':pushM(DialogMode(t.tx,i=>cb(i),{opts:t.opts,cancel:t.cancel}));break;
+ case 'wait':pushM({tr:true,f:t.f,u(){if(--this.f<=0){remM(this);cb()}},d(){}});break;
+ case 'fade':pushM(FadeMode(t.dir,()=>cb()));break;
+ case 'do':cb(t.fn());break;
+ case 'sfx':sfx(t.n);cb();break;
+ case 'song':playSong(t.n);cb();break;
+ case 'emote':pushM(EmoteMode(t.n,t.f||30,()=>cb()));break;
+ case 'npcwalk':pushM(NpcWalkMode(t.n,()=>cb()));break;
+ case 'anim':pushM({tr:true,f:0,u(){this.f++;if(this.f>=t.f){remM(this);cb()}},d(){if(t.d)t.d(this.f)}});break;
+ case 'push':pushM(t.mk(cb));break;
+ case 'battle':pushM(BattleMode(t,r=>cb(r)));break;
+ case 'shop':pushM(ShopMode(t,()=>cb()));break;
+ case 'vault':pushM(VaultMode(()=>cb()));break;
+ case 'party':pushM(PartyMode(t,i=>cb(i)));break;
+ case 'bag':pushM(BagMode(t,r=>cb(r)));break;
+ case 'name':pushM(NameMode(s=>cb(s)));break;
+ case 'forget':pushM(ForgetMode(t.mon,t.mv,i=>cb(i)));break;
+ case 'evo':pushM(EvoMode(t.mon,t.to,r=>cb(r)));break;
+ default:cb()}}
+
+function DialogMode(tx,cb,opt){const pages=[];
+ for(const t of tx){const ls=wrap(t,24);for(let i=0;i<ls.length;i+=2)pages.push(ls.slice(i,i+2))}
+ if(!pages.length)pages.push(['']);
+ let pi=0,shown=0,choosing=false,choice=0;
+ const tot=p=>p.reduce((a,l)=>a+l.length,0);
+ return {tr:true,
+ u(){const spd=[0.6,1.4,3][G?G.opts.txt:1];
+  if(choosing){
+   if(kp('u')){choice=(choice+opt.opts.length-1)%opt.opts.length;sfx('blip')}
+   if(kp('d')){choice=(choice+1)%opt.opts.length;sfx('blip')}
+   if(kp('a')){sfx('conf');remM(this);cb(choice)}
+   else if(kp('b')){sfx('blip');remM(this);cb(opt.cancel!=null?opt.cancel:opt.opts.length-1)}
+   return}
+  const T=tot(pages[pi]);
+  if(shown<T){shown+=spd;if(kp('a')||kp('b'))shown=T;return}
+  if(pi<pages.length-1){if(kp('a')||kp('b')){pi++;shown=0;sfx('blip')}return}
+  if(opt&&opt.opts){choosing=true;return}
+  if(kp('a')||kp('b')){sfx('blip');remM(this);cb()}},
+ d(){panel(0,104,160,40);const ls=pages[pi];let c=0;
+  for(let i=0;i<ls.length;i++){const lim=clamp(fl(shown)-c,0,ls[i].length);drawText(ls[i].slice(0,lim),8,112+i*13);c+=ls[i].length}
+  if(fl(shown)>=tot(pages[pi])&&!choosing&&fl(Date.now()/280)%2){ctx.fillStyle='#282828';ctx.fillRect(149,134,5,2);ctx.fillRect(150,136,3,2);ctx.fillRect(151,138,1,2)}
+  if(choosing){const n=opt.opts.length,w=78,h=n*13+10,px=W-w-1,py=103-h;panel(px,py,w,h);
+   for(let i=0;i<n;i++){drawText(opt.opts[i],px+14,py+6+i*13);if(i===choice)drawText('>',px+5,py+6+i*13)}}}}}
+
+function FadeMode(dir,cb){let f=0;return {tr:true,u(){f++;if(f>=16){remM(this);cb()}},
+ d(){const a=dir==='in'?1-f/16:f/16;ctx.fillStyle='rgba(8,8,12,'+a.toFixed(2)+')';ctx.fillRect(0,0,W,H)}}}
+function EmoteMode(n,fr,cb){let f=0;return {tr:true,u(){f++;if(f>=fr){remM(this);cb()}},
+ d(){const [cx,cy]=OW.cam();const sx=n.x*16+(n.px||0)-cx,sy=n.y*16+(n.py||0)-cy-14;panel(sx+4,sy-2,9,12);drawText('!',sx+6,sy)}}}
+function NpcWalkMode(n,cb){return {tr:true,u(){
+  const ddx=G.x-n.x,ddy=G.y-n.y;
+  if(Math.abs(ddx)+Math.abs(ddy)<=1){n.px=0;n.py=0;remM(this);cb();return}
+  const sx=Math.sign(ddx),sy=Math.sign(ddy);
+  const mx=Math.abs(ddx)>0&&Math.abs(ddx)>=Math.abs(ddy)?sx:0;
+  const my=mx?0:sy;
+  n.px=(n.px||0)+mx*2;n.py=(n.py||0)+my*2;
+  n.fdir=mx>0?'r':mx<0?'l':my>0?'d':'u';
+  if(Math.abs(n.px)>=16||Math.abs(n.py)>=16){n.x+=mx;n.y+=my;n.px=0;n.py=0}},d(){}}}
+
+//------------------------------------------------------------ tint
+function tint(){const mp=MAPS[G.map];if(!mp.out)return;const p=phase();
+ ctx.globalCompositeOperation='multiply';
+ ctx.fillStyle=p==='m'?'rgba(255,206,158,0.32)':p==='d'?'rgba(255,244,220,0.10)':'rgba(96,106,190,0.60)';
+ ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='source-over';
+ if(p==='n'){ctx.fillStyle='rgba(16,20,56,0.22)';ctx.fillRect(0,0,W,H)}}
+
+//------------------------------------------------------------ map helpers
+(function(){const a=MAPS.mosshollow.npcs[0];a.not='snares';
+ MAPS.mosshollow.npcs.push({x:7,y:1,pal:'aide',dir:'d',req:'snares',d:['AIDE: HAVENS mend your KIN for free. Use them often!']})})();
+function tileAt(x,y){const g=MAPS[G.map].g;if(y<0||y>=g.length||x<0||x>=g[0].length)return 'T';return g[y][x]}
+function gateOpen(c){return !!G.flags[G.map+'_'+c]}
+function tileSolid(t){if(SOLID[t])return true;if(t==='H')return true;if((t==='Y'||t==='Z')&&!gateOpen(t))return true;if(t==='L')return true;return false}
+function itemAt(x,y){return MAPS[G.map].items.find(i=>i.x===x&&i.y===y&&!G.flags[i.f])}
+function npcVis(n){if(n.req&&!G.flags[n.req])return false;if(n.not&&G.flags[n.not])return false;if(n.time&&phase()!==n.time)return false;return true}
+function npcVisAt(x,y){for(const n of MAPS[G.map].npcs)if(npcVis(n)&&n.x===x&&n.y===y)return n;return null}
+function blockedAt(x,y){if(tileSolid(tileAt(x,y)))return true;if(itemAt(x,y))return true;if(npcVisAt(x,y))return true;return false}
+
+//------------------------------------------------------------ overworld
+const OW={tr:false,prog:0,len:16,dx:0,dy:0,hop:0,moving:false,sliding:false,bumpT:0,animT:0,faceT:0,
+u(){if(this.bumpT>0)this.bumpT--;
+ if(this.moving){this.stepAnim();return}
+ if(topM()!==this){this.faceT=0;return}
+ npcTick();
+ if(this.sliding){if(this.slideCont())return;this.sliding=false}
+ if(kp('st')){sfx('conf');pushM(PauseMode());return}
+ if(kp('a')){this.interact();return}
+ let d=null;if(KEYS.u)d='u';else if(KEYS.d)d='d';else if(KEYS.l)d='l';else if(KEYS.r)d='r';
+ if(!d){this.faceT=0;return}
+ if(G.dir!==d){G.dir=d;this.faceT=6;return}
+ if(this.faceT>0){this.faceT--;return}
+ this.tryMove(d,false)},
+tryMove(d,auto){const [vx,vy]=DV[d];const tx=G.x+vx,ty=G.y+vy;const mp=MAPS[G.map];
+ const w=mp.g[0].length,h=mp.g.length;
+ if(tx<0||ty<0||tx>=w||ty>=h){if(!auto)this.tryEdge(d);return false}
+ const t=tileAt(tx,ty);
+ if(t==='L'&&d==='d'){this.hop=1;this.startMove(vx,vy,32);sfx('hop');return true}
+ if(blockedAt(tx,ty)){if(!auto&&this.bumpT<=0){sfx('bump');this.bumpT=14}return false}
+ this.startMove(vx,vy,16);return true},
+startMove(vx,vy,len){this.moving=true;this.dx=vx;this.dy=vy;this.prog=0;this.len=len},
+stepAnim(){this.prog+=2;this.animT++;
+ if(this.prog>=this.len){G.x+=this.dx*(this.len/16);G.y+=this.dy*(this.len/16);
+  this.moving=false;this.hop=0;this.prog=0;this.arrive()}},
+slideCont(){const t=tileAt(G.x,G.y);
+ if(t==='i')return this.tryMove(G.dir,true);
+ if(CURDIR[t])return this.tryMove(CURDIR[t],true);
+ return false},
+tryEdge(d){const mp=MAPS[G.map];const e=mp.edges&&mp.edges[{u:'N',d:'S',l:'W',r:'E'}[d]];
+ if(!e){if(this.bumpT<=0){sfx('bump');this.bumpT=14}return}
+ const tg=MAPS[e.m],w=tg.g[0].length,h=tg.g.length;let nx,ny;
+ if(d==='u'){nx=clamp(G.x+e.d,0,w-1);ny=h-1}
+ else if(d==='d'){nx=clamp(G.x+e.d,0,w-1);ny=0}
+ else if(d==='l'){nx=w-1;ny=clamp(G.y+e.d,0,h-1)}
+ else {nx=0;ny=clamp(G.y+e.d,0,h-1)}
+ warpTo(e.m,nx,ny,d)},
+arrive(){const mp=MAPS[G.map];const t=tileAt(G.x,G.y);
+ G.steps++;if(G.steps%128===0)for(const m of G.party)m.fr=Math.min(255,m.fr+1);
+ if(t==='u'||t==='U'){const gc=t==='u'?'Y':'Z';const f=G.map+'_'+gc;
+  if(!G.flags[f]){G.flags[f]=1;sfx('click');runScript(function*(){yield say('CLICK! A hedge gate slid open somewhere.')});return}}
+ const wp=mp.warps.find(q=>q.x===G.x&&q.y===G.y);
+ if(wp){doWarp(wp);return}
+ if(t==='i'||CURDIR[t]){this.sliding=true;return}
+ const tg=mp.trig.find(q=>q.x===G.x&&q.y===G.y&&(!q.not||!G.flags[q.not]));
+ if(tg){runScript(SCRIPTS[tg.s]);return}
+ if((t==='g'||t==='q')&&mp.enc){if(this.rollEnc())return}
+ losScan()},
+rollEnc(){const t=tileAt(G.x,G.y);const rate=t==='g'?0.14:0.07;if(!ch(rate))return false;
+ const R=G.roamer;
+ if(R.on&&!R.beat&&!R.caught&&R.map===G.map&&phase()==='n'&&ch(0.35)){startWild(roamerMon(),1);return true}
+ const tab=MAPS[G.map].enc[phase()]||MAPS[G.map].enc.d;const e=wpick(tab);
+ startWild(makeMon(e[0],e[1]+ri(e[2]-e[1]+1),{gleam:ri(64)===0,fr:70}),0);return true},
+interact(){const mp=MAPS[G.map];const [vx,vy]=DV[G.dir];const fx=G.x+vx,fy=G.y+vy;
+ let n=npcVisAt(fx,fy);
+ if(!n&&tileAt(fx,fy)==='k')n=npcVisAt(fx+vx,fy+vy);
+ if(n){n.fdir=OPP[G.dir];sfx('blip');
+  if(n.tr&&!G.flags[n.tr.f]){runScript(function*(){yield* trainerScript(n);yield* doEvos()});return}
+  if(n.tr&&G.flags[n.tr.f]){runScript(function*(){yield say(...(n.tr.a||['...']))});return}
+  if(n.dscript){runScript(SCRIPTS[n.dscript]);return}
+  if(n.d){runScript(function*(){yield say(...n.d)});return}
+  return}
+ const sg=mp.signs&&mp.signs[fx+','+fy];
+ if(sg){sfx('blip');runScript(function*(){yield say(sg)});return}
+ const it=itemAt(fx,fy);
+ if(it){runScript(function*(){yield doT(()=>{addItem(it.it,it.q||1);G.flags[it.f]=1});yield sfxT('found');
+  yield say(G.name+' found '+((it.q||1)>1?it.q+'x ':'')+IT[it.it].n+'!')});return}
+ const ex=mp.exam&&mp.exam.find(e=>e.x===fx&&e.y===fy);
+ if(ex){runScript(SCRIPTS[ex.s]);return}},
+cam(){const mp=MAPS[G.map];const mw=mp.g[0].length*16,mh=mp.g.length*16;
+ let px=G.x*16,py=G.y*16;
+ if(this.moving){px+=this.dx*this.prog;py+=this.dy*this.prog}
+ return [fl(clamp(px-72,0,Math.max(0,mw-W))),fl(clamp(py-64,0,Math.max(0,mh-H)))]},
+d(){const mp=MAPS[G.map];const [cx,cy]=this.cam();
+ ctx.fillStyle='#101018';ctx.fillRect(0,0,W,H);
+ const x0=fl(cx/16),y0=fl(cy/16),x1=fl((cx+W-1)/16),y1=fl((cy+H-1)/16);
+ for(let ty=y0;ty<=y1;ty++)for(let tx2=x0;tx2<=x1;tx2++){
+  let t=tileAt(tx2,ty);
+  if((t==='Y'||t==='Z')&&gateOpen(t))t='_';
+  const c=TIL[t]||TIL['.'];ctx.drawImage(c,tx2*16-cx,ty*16-cy)}
+ for(const lb of (mp.labels||[])){const tw=lb.t.length*6-1;
+  const sx=fl(lb.x*16+8-tw/2)-cx,sy=lb.y*16-cy+1;
+  if(sx+tw<-2||sx>W||sy<-10||sy>H)continue;
+  ctx.fillStyle='#14141c';ctx.fillRect(sx-2,sy-1,tw+4,9);
+  ctx.fillStyle='#3a3a4a';ctx.fillRect(sx-2,sy-1,tw+4,1);
+  drawText(lb.t,sx,sy,'#f8f4d8')}
+ for(const it of mp.items){if(G.flags[it.f])continue;const sx=it.x*16-cx,sy=it.y*16-cy;
+  if(sx<-16||sy<-16||sx>W||sy>H)continue;
+  ctx.fillStyle='#30343c';ctx.fillRect(sx+4,sy+5,8,8);
+  ctx.fillStyle='#e85058';ctx.fillRect(sx+5,sy+6,6,3);
+  ctx.fillStyle='#f0f0e8';ctx.fillRect(sx+5,sy+9,6,3);
+  ctx.fillStyle='#f8b8b8';ctx.fillRect(sx+6,sy+7,1,1)}
+ const ents=[];
+ for(const n of mp.npcs){if(!npcVis(n))continue;
+  ents.push({y:n.y*16+(n.py||0),f:()=>ctx.drawImage(npcSpr(n.pal,n.fdir||n.dir),n.x*16+(n.px||0)-cx,n.y*16+(n.py||0)-cy-2)})}
+ let ppx=G.x*16,ppy=G.y*16;
+ if(this.moving){ppx+=this.dx*this.prog;ppy+=this.dy*this.prog}
+ const lift=this.hop?-fl(7*Math.sin(Math.PI*this.prog/this.len)):0;
+ const wf=this.moving&&fl(this.animT/7)%2===1;
+ ents.push({y:ppy+1,f:()=>{if(this.hop){ctx.fillStyle='rgba(16,28,16,0.35)';ctx.fillRect(ppx-cx+4,ppy-cy+12,8,3)}
+  ctx.drawImage(heroSpr(G.dir,wf),ppx-cx,ppy-cy-2+lift)}});
+ ents.sort((a,b)=>a.y-b.y);for(const e of ents)e.f();
+ if(!this.moving&&tileAt(G.x,G.y)==='g')ctx.drawImage(TIL['g'],0,8,16,8,G.x*16-cx,G.y*16-cy+8,16,8);
+ tint();
+ if(mp.out){panel(W-42,0,42,13);drawText(clockStr(),W-37,3)}}};
+
+function npcTick(){const mp=MAPS[G.map];
+ for(const n of mp.npcs){if(!npcVis(n))continue;
+  if(n.px)n.px-=Math.sign(n.px);if(n.py)n.py-=Math.sign(n.py);
+  if(!n.mv)continue;
+  if(--n.wt>0)continue;n.wt=70+ri(110);
+  const d=pick(['u','d','l','r']);const [vx,vy]=DV[d];
+  const tx=n.x+vx,ty=n.y+vy;
+  if(Math.abs(tx-n.x0)>1||Math.abs(ty-n.y0)>1)continue;
+  if(blockedAt(tx,ty)||(tx===G.x&&ty===G.y))continue;
+  const t=tileAt(tx,ty);
+  if(t!=='.'&&t!=='-'&&t!=='f'&&t!=='_')continue;
+  if(mp.warps.some(w=>w.x===tx&&w.y===ty))continue;
+  n.fdir=d;n.x=tx;n.y=ty;n.px=-vx*16;n.py=-vy*16}}
+function losScan(){if(topM()!==OW)return;const mp=MAPS[G.map];
+ for(const n of mp.npcs){if(!npcVis(n)||!n.tr||!(n.tr.sight>0)||G.flags[n.tr.f])continue;
+  const [vx,vy]=DV[n.fdir||n.dir];
+  for(let i=1;i<=n.tr.sight;i++){const tx=n.x+vx*i,ty=n.y+vy*i;
+   if(tx===G.x&&ty===G.y){engage(n);return}
+   if(blockedAt(tx,ty))break}}}
+function engage(n){runScript(function*(){
+ yield sfxT('conf');yield {k:'emote',n,f:26};yield {k:'npcwalk',n};
+ yield doT(()=>{const ddx=n.x-G.x,ddy=n.y-G.y;
+  G.dir=Math.abs(ddx)>Math.abs(ddy)?(ddx>0?'r':'l'):(ddy>0?'d':'u');n.fdir=OPP[G.dir]});
+ yield* trainerScript(n);yield* doEvos()})}
+function warpTo(m,x,y,dir){G.map=m;G.x=x;G.y=y;if(dir)G.dir=dir;OW.moving=false;OW.sliding=false;OW.prog=0;enterMap()}
+function enterMap(){const mp=MAPS[G.map];if(mp.mus&&AUD.song!==mp.mus)playSong(mp.mus);
+ G.roamer.map=pick(['route1','route2','route3']);
+ for(const n of mp.npcs){n.px=0;n.py=0}}
+function doWarp(w){runScript(function*(){yield {k:'fade',dir:'out'};yield doT(()=>warpTo(w.m,w.tx,w.ty,w.dir));yield {k:'fade',dir:'in'}})}
+function roamerMon(){const R=G.roamer;const m=makeMon(30,20,{fr:30});
+ if(R.hp>=0&&R.hp<=maxHP(m)){m.hp=R.hp;m.st=R.st;m.slp=R.slp}else R.hp=m.hp;
+ return m}
+function startWild(mon,isRoamer){runScript(function*(){
+ const r=yield {k:'battle',wild:mon,roamer:isRoamer};
+ if(r==='loss')yield* whiteout();
+ yield* doEvos()})}
+function* trainerScript(n){const t=n.tr;
+ yield say(...(t.b||[t.name+' wants to duel!']));
+ const r=yield {k:'battle',tr:t};
+ if(r==='win'){G.flags[t.f]=1;yield say(...(t.a||['...']));
+  if(t.win)yield* SCRIPTS[t.win]()}
+ else if(r==='loss')yield* whiteout()}
+function* whiteout(){yield say(G.name+' is out of usable KIN!',G.name+' whited out!');
+ yield {k:'fade',dir:'out'};
+ yield doT(()=>{G.money=fl(G.money/2);healParty();warpTo(G.heal.m,G.heal.x,G.heal.y,'d')});
+ yield wait(20);yield {k:'fade',dir:'in'};
+ yield say('You hurried somewhere safe...')}
+function queueEvo(pi){const m=G.party[pi];if(!m)return;const ev=SP[m.id].ev;if(!ev)return;
+ if(EVOQ.some(e=>e.pi===pi))return;
+ if((ev.l&&m.lv>=ev.l)||(ev.fr&&m.fr>=ev.fr))EVOQ.push({pi,from:m.id,to:ev.to})}
+function* doEvos(){while(EVOQ.length){const e=EVOQ.shift();const m=G.party[e.pi];
+ if(!m||m.id!==e.from)continue;
+ yield say('What? '+SP[m.id].n+' is evolving!');
+ const r=yield {k:'evo',mon:m,to:e.to};
+ if(r==='cancel'){sfx('deny');yield say('...It stopped evolving!');continue}
+ const oldN=SP[m.id].n,oldMax=maxHP(m);
+ yield doT(()=>{m.id=e.to;m.hp=Math.min(m.hp+(maxHP(m)-oldMax),maxHP(m));addCaught(e.to)});
+ yield sfxT('evo');
+ yield say(oldN+' evolved into '+SP[e.to].n+'!')}}
+function rivalTeam(stage){const s=(G&&G.rival)||3;
+ if(stage===1)return [[s,5]];
+ return [[19,12],[9,11],[s,14]]}
+
+//------------------------------------------------------------ field scripts
+function* shopFlow(stock){for(;;){const i=yield ask(['CLERK: How can I help you?'],['BUY','SELL','LEAVE'],2);
+ if(i===0)yield {k:'shop',stock,mode:'buy'};
+ else if(i===1)yield {k:'shop',mode:'sell'};
+ else break}
+ yield say('CLERK: Come again!')}
+function* orbPick(i){if(G.flags.gotstarter){yield say('The other KIN were sent off to new homes.');return}
+ const id=STARTERS[i],s=SP[id];
+ yield say('The '+s.t[0]+' KIN, '+s.n+'!');
+ const c=yield ask([s.dex,'Choose '+s.n+'?'],['YES','NO'],1);
+ if(c!==0)return;
+ yield doT(()=>{G.party.push(makeMon(id,5,{fr:90}));addCaught(id);setF('gotstarter');G.rival=RIVALPICK[id]});
+ yield sfxT('catch');
+ yield say(G.name+' chose '+s.n+'!');
+ yield say('BRAMBLE: A fine match!','Your rival ROOK took '+SP[G.rival].n+' at dawn. The type that beats yours.','He called it "strategy." Hmph.');
+ yield doT(()=>setF('kindex'));yield sfxT('found');
+ yield say(G.name+' received the KINDEX!','BRAMBLE: It records every KIN you see and snare.','My AIDE at the north exit has a parting gift. Travel well!')}
+const SCRIPTS={
+aide:function*(){if(!G.flags.gotstarter){yield say('AIDE: Hold on! Professor BRAMBLE needs you at the LAB first.','Big blue roof, south side of the village.');yield doT(()=>{G.y=Math.min(G.y+1,3);G.dir='d'});return}
+ yield say('AIDE: Off already? The Professor sent these along.');
+ yield doT(()=>{addItem('snare',5);setF('snares')});yield sfxT('found');
+ yield say(G.name+' received 5 SNARES!','AIDE: Weaken a wild KIN first. Sleep makes snaring far easier!')},
+mom:function*(){if(!G.flags.gotstarter){yield say('MOM: Professor BRAMBLE was asking for you!',"He's at the LAB. Go on, shoo! Adventure won't start itself.");return}
+ const i=yield ask(['MOM: Look at you, a real KEEPER!','Want to rest up before you go?'],['YES','NO'],1);
+ if(i===0){yield doT(()=>healParty());yield sfxT('heal');yield wait(30);yield say('MOM: There. Good as new!')}
+ else yield say("MOM: Don't forget to visit, hero.")},
+bed:function*(){const i=yield ask(['The bed looks warm and inviting.','Take a nap?'],['YES','NO'],1);
+ if(i!==0)return;
+ yield {k:'fade',dir:'out'};yield doT(()=>healParty());yield sfxT('heal');yield wait(35);
+ yield {k:'fade',dir:'in'};yield say(G.name+' woke up refreshed!')},
+prof:function*(){if(!G.flags.gotstarter){yield say('BRAMBLE: Ah, '+G.name+'! Right on time.','Three young KIN wait on that table: EMBER, TIDE and FLORA.','Go on. Choose your partner!');return}
+ yield say('BRAMBLE: Fill that KINDEX! Walk, battle, snare.','KIN grow fond of a kind KEEPER as you travel.','Some only reveal their true form to a real friend.')},
+orb0:function*(){yield* orbPick(0)},
+orb1:function*(){yield* orbPick(1)},
+orb2:function*(){yield* orbPick(2)},
+nurse:function*(){const i=yield ask(['NURSE: Welcome to the HAVEN!','Shall I mend your KIN?'],['YES','NO'],1);
+ if(i===0){yield doT(()=>{healParty();G.heal={m:G.map,x:5,y:4}});yield sfxT('heal');yield wait(40);
+  yield say('NURSE: All mended! Do come again.')}
+ else yield say('NURSE: Safe roads!')},
+pc:function*(){yield sfxT('conf');yield say(G.name+' booted up the KIN VAULT.');yield {k:'vault'}},
+shop1:function*(){yield* shopFlow(['snare','tonic','remedy','juneberry'])},
+shop2:function*(){yield* shopFlow(['snare','primesnare','tonic','supertonic','remedy','rekindle'])},
+shop3:function*(){yield* shopFlow(['primesnare','apexsnare','supertonic','rekindle','remedy','powerband'])},
+vendor:function*(){yield say('VENDOR: Psst. The moon market is open.','Best gear, night prices. No refunds, no questions.');
+ yield* shopFlow(['apexsnare','coincharm','tidepearl','rekindle'])},
+keeper:function*(){if(G.lastGift===G.day){yield say('KEEPER: Mornings are for walking. KIN love a good walk.');return}
+ yield say('KEEPER: Ah, a fellow early bird!','Morning dew grows the sweetest JUNEBERRIES. Take one!');
+ yield doT(()=>{addItem('juneberry',1);G.lastGift=G.day});yield sfxT('found');
+ yield say(G.name+' received a JUNEBERRY!')},
+miner:function*(){if(!G.flags.gloamgone){yield say('MINER: Those GLOAM creeps cornered me!','They want my ALLOY CORES for some "eclipse engine."','Please, run them off!');return}
+ if(!G.flags.core){yield say('MINER: You ran them off! You absolute gem.','Take this. Dug it from the deepest vein.');
+  yield doT(()=>{addItem('alloycore',1);setF('core')});yield sfxT('found');
+  yield say(G.name+' received an ALLOY CORE!','MINER: Odd ore. A certain STONE KIN hums when it gets close...');return}
+ yield say('MINER: That ore hums louder at night. Spooky, eh?')},
+rival1win:function*(){yield say('ROOK stormed off toward ROUTE 1.')},
+rival2:function*(){yield sfxT('conf');
+ yield say('ROOK: Hold it!','Still hauling that same starter around? Adorable.','Watch how a real KEEPER builds a team.');
+ const r=yield {k:'battle',tr:{name:'RIVAL ROOK',rival:2,m:700,f:'rival2'}};
+ if(r==='win'){yield doT(()=>setF('rival2'));
+  yield say('ROOK: ...You train hard. Annoying.','BRAVA in CINDERVALE melts careless teams. Be careful.','Not that I care.')}
+ else if(r==='loss'){yield* whiteout()}
+ yield* doEvos()},
+badge1:function*(){yield sfxT('badge');
+ yield say('BRIAR: Take the BLOOM BADGE. You earned every petal.');
+ yield doT(()=>{if(!G.badges.includes('BLOOM'))G.badges.push('BLOOM')});
+ yield say(G.name+' received the BLOOM BADGE!');
+ yield doT(()=>addItem('leafcrest',1));yield sfxT('found');
+ yield say('BRIAR: And a LEAF CREST. Held, it feeds FLORA moves.','East past ROUTE 2 lies CINDERVALE... if you brave the cave.');
+ yield doT(()=>{G.roamer.on=1});yield wait(20);
+ yield say('...Far away, something ancient stirred in the night.')},
+badge2:function*(){yield sfxT('badge');
+ yield say('BRAVA: The CINDER BADGE! Wear it hot.');
+ yield doT(()=>{if(!G.badges.includes('CINDER'))G.badges.push('CINDER')});
+ yield say(G.name+' received the CINDER BADGE!');
+ yield doT(()=>addItem('cinderfang',1));yield sfxT('found');
+ yield say('BRAVA: And a CINDER FANG, for your fire.','That makes two! But BRONTE waits north past CINDERVALE.','Their VOLT gym in STORMREACH crackles. Pack STONE moves!','And that legend NOCTELK still walks the three roads at night.')},
+badge3:function*(){yield sfxT('badge');
+ yield say('BRONTE: The SURGE BADGE is yours. Fully charged!');
+ yield doT(()=>{if(!G.badges.includes('SURGE'))G.badges.push('SURGE')});
+ yield say(G.name+' received the SURGE BADGE!');
+ yield doT(()=>addItem('stormcell',1));yield sfxT('found');
+ yield say('BRONTE: And a STORM CELL. It supercharges VOLT moves.','Three badges! You light up Solvane, KEEPER.','The AURELIA gate north is sealed... for now.','But NOCTELK still walks the three roads at night. Go chase the storm.')},
+gloamwin:function*(){yield say('VESPER: The eclipse will rise... elsewhere!');
+ yield doT(()=>setF('gloamgone'));
+ yield say('The GLOAM SYNDICATE scattered into the dark!')}};
+
+//------------------------------------------------------------ battle engine
+const STATN={atk:'ATTACK',def:'DEFENSE',spc:'SPIRIT',spe:'SPEED',acc:'ACCURACY'};
+const STCOL={PSN:'#9858b0',BRN:'#d86020',PAR:'#b89010',SLP:'#7068b8'};
+const zeroS=()=>({atk:0,def:0,spc:0,spe:0,acc:0});
+const stg=s=>s>=0?(2+s)/2:2/(2-s);
+const astg=s=>s>=0?(3+s)/3:3/(3-s);
+function effSpe(m,S){let v=stat(m,'sp');v=fl(v*stg(S.spe));if(m.item==='quickquill')v=fl(v*1.12);if(m.st==='PAR')v=fl(v/4);return Math.max(1,v)}
+function heldDmg(att,def,mv,base,phys){
+ if(att.item==='powerband')base=fl(base*1.1);
+ if(att.item==='cinderfang'&&mv.t==='EMBER')base=fl(base*1.2);
+ if(att.item==='tidepearl'&&mv.t==='TIDE')base=fl(base*1.2);
+ if(att.item==='leafcrest'&&mv.t==='FLORA')base=fl(base*1.2);
+ if(att.item==='stormcell'&&mv.t==='VOLT')base=fl(base*1.2);
+ return base}
+function calcDmg(att,def,aS,dS,mv,crit){const phys=!!PHYS[mv.t];
+ let A=stat(att,phys?'at':'sc'),D=stat(def,phys?'df':'sc');
+ if(!crit){A=Math.max(1,fl(A*stg(aS[phys?'atk':'spc'])));D=Math.max(1,fl(D*stg(dS[phys?'def':'spc'])))}
+ if(def.item==='irontalisman'&&phys)D=fl(D*1.12);
+ if(att.st==='BRN'&&phys)A=Math.max(1,fl(A/2));
+ let b=fl(fl(fl(2*att.lv/5+2)*mv.p*A/Math.max(1,D))/50)+2;
+ if(crit)b*=2;
+ if(SP[att.id].t.includes(mv.t))b=fl(b*1.5);
+ b=fl(b*effMul(mv.t,SP[def.id].t));
+ b=heldDmg(att,def,mv,b,phys);
+ b=fl(b*(217+ri(39))/255);
+ return Math.max(1,b)}
+function aiPick(e,p,turn){const us=e.mv.filter(s=>s.pp>0);
+ if(!us.length)return {id:'struggle',pp:1};
+ let tot=0;const sc=us.map(s=>{const m=MV[s.id];let w;
+  if(m.p>0){const ef=effMul(m.t,SP[p.id].t);w=ef===0?0.01:m.p*ef*(SP[e.id].t.includes(m.t)?1.5:1)}
+  else{w=(turn<2?42:10);if(m.st&&p.st)w=0.5}
+  tot+=w;return [s,w]});
+ let r=Math.random()*tot;for(const [s,w] of sc){r-=w;if(r<0)return s}return us[0]}
+function canUseItem(m,id){const it=IT[id];if(!m)return false;
+ if(it.k==='heal')return m.hp>0&&m.hp<maxHP(m);
+ if(it.k==='cure')return m.hp>0&&!!m.st;
+ if(it.k==='rev')return m.hp<=0;
+ return false}
+function useItemOn(m,id){const it=IT[id];
+ if(it.k==='heal'){const h=Math.min(it.hp,maxHP(m)-m.hp);m.hp+=h;remItem(id);return SP[m.id].n+' recovered '+h+' HP!'}
+ if(it.k==='cure'){m.st=0;m.slp=0;remItem(id);return SP[m.id].n+' is cured!'}
+ if(it.k==='rev'){m.hp=fl(maxHP(m)/2);m.st=0;m.slp=0;remItem(id);return SP[m.id].n+' came back to its senses!'}
+ return 'Nothing happened.'}
+function mkBattle(t){const B={tr:false,t:t.tr||null,kind:t.tr?'tr':'wild',roamer:!!t.roamer,
+ e:null,eTeam:null,eIdx:0,pIdx:Math.max(0,firstAlive()),
+ pS:zeroS(),eS:zeroS(),parts:new Set(),turn:0,runs:0,
+ eShown:0,pShown:0,eOff:90,pOff:-90,hideE:0,hideP:0,eDrop:0,pDrop:0,
+ flashE:0,flashP:0,shakeT:0,spark:0,ball:null,wob:0,beepT:30,
+ u(){},
+ d(){
+  // per-frame visual easing
+  if(this.e){const d1=this.e.hp-this.eShown;if(Math.abs(d1)>0.4)this.eShown+=Math.sign(d1)*Math.max(0.45,Math.abs(d1)/9);else this.eShown=this.e.hp}
+  const P=G.party[this.pIdx];
+  if(P){const d2=P.hp-this.pShown;if(Math.abs(d2)>0.4)this.pShown+=Math.sign(d2)*Math.max(0.45,Math.abs(d2)/9);else this.pShown=P.hp}
+  if(this.flashE>0)this.flashE--;if(this.flashP>0)this.flashP--;
+  if(this.shakeT>0)this.shakeT--;if(this.spark>0)this.spark--;
+  if(P&&P.hp>0&&P.hp<=maxHP(P)*0.25){if(--this.beepT<=0){sfx('beep');this.beepT=32}}
+  const sh=this.shakeT>0?ri(5)-2:0;
+  ctx.fillStyle='#f0efe0';ctx.fillRect(0,0,W,104);
+  ctx.fillStyle='#dce9c6';ctx.fillRect(86+sh,40,64,9);ctx.fillStyle='#b9cf9e';ctx.fillRect(86+sh,47,64,2);
+  ctx.fillStyle='#dce9c6';ctx.fillRect(6+sh,96,68,8);ctx.fillStyle='#b9cf9e';ctx.fillRect(6+sh,102,68,2);
+  if(this.e&&!this.hideE&&!(this.flashE%4>=2)){
+   ctx.drawImage(monSpr(this.e.id,this.e.gleam),0,0,16,16,104+this.eOff+sh,12+this.eDrop,32,32)}
+  if(this.spark>0&&this.e){for(let i=0;i<3;i++)drawText('*',104+ri(34),10+ri(34),i?'#f8e060':'#fff')}
+  if(this.ball){const b=this.ball;ctx.fillStyle='#202028';ctx.fillRect(b.x+this.wob,b.y,8,8);
+   ctx.fillStyle='#e04848';ctx.fillRect(b.x+1+this.wob,b.y+1,6,3);
+   ctx.fillStyle='#f0f0e8';ctx.fillRect(b.x+1+this.wob,b.y+4,6,3);
+   ctx.fillStyle='#f8f8f8';ctx.fillRect(b.x+3+this.wob,b.y+3,2,2)}
+  if(P&&!this.hideP&&!(this.flashP%4>=2)){
+   ctx.drawImage(monSpr(P.id,P.gleam),0,0,16,16,14+this.pOff+sh,52+this.pDrop,48,48)}
+  if(this.e){panel(2,3,80,28);const e=this.e;
+   drawText(SP[e.id].n.slice(0,9)+(e.gleam?'*':''),7,7);
+   hpbar(8,16,64,this.eShown,maxHP(e));
+   drawText('L'+e.lv,7,21);
+   if(e.st)drawText(e.st,40,21,STCOL[e.st]);
+   if(this.roamer)drawText('~',68,7,'#564a63')}
+  if(P){panel(80,66,78,38);
+   drawText(SP[P.id].n.slice(0,9)+(P.gleam?'*':''),85,70);
+   hpbar(88,79,64,this.pShown,maxHP(P));
+   drawText(fl(Math.max(0,this.pShown))+'/'+maxHP(P),88,84);
+   drawText('L'+P.lv,134,70);
+   if(P.st)drawText(P.st,130,84,STCOL[P.st]);
+   const e0=expFor(P.lv),e1=expFor(P.lv+1);
+   ctx.fillStyle='#404048';ctx.fillRect(88,95,64,3);
+   ctx.fillStyle='#48a8e0';ctx.fillRect(88,95,fl(64*clamp((P.exp-e0)/Math.max(1,e1-e0),0,1)),3)}
+  panel(0,104,160,40)}};
+ if(t.tr){B.eTeam=(t.tr.rival?rivalTeam(t.tr.rival):t.tr.team).map(e2=>makeMon(e2[0],e2[1],{fr:70,gleam:0}))}
+ else{B.e=t.wild;B.eShown=t.wild.hp}
+ const P=G.party[B.pIdx];if(P)B.pShown=P.hp;
+ return B}
+function BattleMode(t,cb){const B=mkBattle(t);
+ B.started=false;
+ B.u=function(){if(!B.started){B.started=true;
+  startScript(battleFlow(B),r=>{remM(B);const mp=MAPS[G.map];playSong(mp&&mp.mus?mp.mus:'over');cb(r)})}};
+ return B}
+function bAnim(B,f,d){return {k:'anim',f,d}}
+function* battleFlow(B){
+ yield {k:'song',n:(MAPS[G.map]&&MAPS[G.map].mus==='gym')?'gymbattle':'battle'};
+ yield bAnim(B,30,f=>{if(f<14){ctx.fillStyle=f%4<2?'#080810':'#e8e8d8';ctx.fillRect(0,0,W,H)}
+  else{const h2=fl((H/2)*(1-(f-14)/16));ctx.fillStyle='#080810';if(h2>0){ctx.fillRect(0,0,W,h2);ctx.fillRect(0,H-h2,W,h2)}}});
+ if(B.kind==='wild'){addSeen(B.e.id);
+  yield bAnim(B,16,f=>{B.eOff=fl((16-f)*5.6)});B.eOff=0;
+  yield say('A wild '+SP[B.e.id].n+' appeared!');
+  if(B.e.gleam){B.spark=70;sfx('found');yield say('It GLEAMS like treasure!')}
+  if(B.roamer){sfx('found');yield say('The legend of the night roads!')}}
+ else{yield say(B.t.name+' wants to duel!');yield* enemySend(B,0)}
+ yield* playerSend(B,B.pIdx,true);
+ for(;;){B.turn++;
+  let act=yield* playerAction(B);
+  if(act.t==='ball'){const r=yield* throwBall(B,act.id);if(r)return r;act=null}
+  else if(act.t==='run'){if(yield* tryRun(B))return 'ran';act=null}
+  else if(act.t==='item'){yield say(G.name+' used a '+IT[act.id].n+'!');
+   const msg=useItemOn(G.party[act.tgt],act.id);sfx('heal');
+   if(act.tgt===B.pIdx)B.pShown=Math.min(B.pShown,G.party[B.pIdx].hp);
+   yield say(msg);act=null}
+  else if(act.t==='switch'){yield* doSwitch(B,act.i,false);act=null}
+  const P=()=>G.party[B.pIdx];
+  if(B.e.hp>0&&P().hp>0){
+   const em=aiPick(B.e,P(),B.turn);
+   if(act&&act.t==='fight'){
+    const pf=goesFirst(B,act.mv,em);
+    for(const w of (pf?['p','e']:['e','p'])){
+     if(B.e.hp<=0||P().hp<=0)break;
+     if(w==='p')yield* doMove(B,'p',act.mv);else yield* doMove(B,'e',em)}}
+   else yield* doMove(B,'e',em)}
+  let r=yield* handleFaints(B);if(r)return r;
+  r=yield* endTurn(B);if(r)return r;
+  if(B.roamer&&B.e.hp>0){
+   if(B.e.st!=='SLP'){yield* persistRoamer(B);sfx('run');
+    yield say('NOCTELK slipped back into the dark!');return 'fled'}
+   yield say('NOCTELK stirs in its sleep...')}}}
+function goesFirst(B,pm,em){const pp=MV[pm.id].pr||0,ep=MV[em.id].pr||0;
+ if(pp!==ep)return pp>ep;
+ const ps=effSpe(G.party[B.pIdx],B.pS),es=effSpe(B.e,B.eS);
+ if(ps!==es)return ps>es;return ch(.5)}
+function* enemySend(B,i){B.eIdx=i;B.e=B.eTeam[i];B.eS=zeroS();B.hideE=0;B.eDrop=0;B.eShown=B.e.hp;B.eOff=90;
+ addSeen(B.e.id);B.parts=new Set([B.pIdx]);
+ yield say(B.t.name+' sent out '+SP[B.e.id].n+'!');
+ yield bAnim(B,14,f=>{B.eOff=fl((14-f)*6.4)});B.eOff=0}
+function* playerSend(B,i,first){B.pIdx=i;B.pS=zeroS();B.hideP=0;B.pDrop=0;const m=G.party[i];B.pShown=m?m.hp:0;
+ B.parts.add(i);B.pOff=-90;
+ yield say((first?'Go! ':'You got this, ')+SP[m.id].n+'!');
+ yield bAnim(B,14,f=>{B.pOff=-fl((14-f)*6.4)});B.pOff=0}
+function* doSwitch(B,i,forced){if(!forced){yield say('Come back, '+SP[G.party[B.pIdx].id].n+'!');
+  yield bAnim(B,10,f=>{B.pOff=-f*9});B.hideP=1}
+ yield* playerSend(B,i,false)}
+function* playerAction(B){const P=()=>G.party[B.pIdx];
+ for(;;){
+  const c=yield {k:'push',tag:'bmenu',B,mk:cb=>BMenuMode(B,cb)};
+  if(c===0){
+   if(!P().mv.some(s=>s.pp>0)){yield say(SP[P().id].n+' has no moves left!');return {t:'fight',mv:{id:'struggle',pp:1}}}
+   const mi=yield {k:'push',tag:'bmove',B,mk:cb=>BMoveMode(B,cb)};
+   if(mi<0)continue;
+   const s=P().mv[mi];
+   if(s.pp<=0){sfx('deny');yield say('No PP left for that move!');continue}
+   return {t:'fight',mv:s}}
+  if(c===1){const id=yield {k:'bag',battle:1};
+   if(!id)continue;
+   if(IT[id].k==='ball'){
+    if(B.kind==='tr'){yield say("You can't snare another KEEPER's KIN!");continue}
+    return {t:'ball',id}}
+   const tgt=yield {k:'party',pick:1,battle:1,cur:B.pIdx,title:'USE ON WHICH KIN?'};
+   if(tgt<0)continue;
+   if(!canUseItem(G.party[tgt],id)){yield say("It won't have any effect.");continue}
+   return {t:'item',id,tgt}}
+  if(c===2){const i=yield {k:'party',pick:1,battle:1,cur:B.pIdx,title:'SWITCH TO WHICH KIN?'};
+   if(i<0)continue;
+   return {t:'switch',i}}
+  if(c===3){
+   if(B.kind==='tr'){yield say("Can't flee a KEEPER duel!");continue}
+   return {t:'run'}}}}
+function* tryRun(B){const F=fl(effSpe(G.party[B.pIdx],B.pS)*128/Math.max(1,effSpe(B.e,B.eS)))+30*(++B.runs);
+ if(F>255||ri(256)<F){sfx('run');yield say('Got away safely!');
+  if(B.roamer)yield* persistRoamer(B);
+  return true}
+ yield say("Can't escape!");return false}
+function* persistRoamer(B){yield doT(()=>{G.roamer.hp=B.e.hp;G.roamer.st=B.e.st;G.roamer.slp=B.e.slp})}
+function* doMove(B,side,slot){const att=side==='p'?G.party[B.pIdx]:B.e;
+ const def=side==='p'?B.e:G.party[B.pIdx];
+ const aS=side==='p'?B.pS:B.eS,dS=side==='p'?B.eS:B.pS;
+ const an=(side==='p'?'':'Foe ')+SP[att.id].n,dn=(side==='p'?'Foe ':'')+SP[def.id].n;
+ const mv=MV[slot.id];
+ if(att.st==='SLP'){att.slp--;
+  if(att.slp>0){yield say(an+' is fast asleep!');return}
+  att.st=0;yield say(an+' woke up!')}
+ if(att.st==='PAR'&&ch(.25)){yield say(an+' is fully numbed!');return}
+ if(slot.id!=='struggle')slot.pp--;
+ yield say(an+' used '+mv.n+'!');
+ if(mv.a>0){const hitC=(mv.a/100)*astg(aS.acc);
+  if(Math.random()>=hitC){yield say('The attack missed!');return}}
+ if(mv.p>0){
+  const ef=effMul(mv.t,SP[def.id].t);
+  if(ef===0){yield say("It doesn't affect "+dn+'...');return}
+  const crit=ch(mv.hc?1/8:1/16);
+  const dmg=calcDmg(att,def,aS,dS,mv,crit);
+  if(side==='p'){B.flashE=14}else{B.flashP=14}
+  if(ef>1||crit)B.shakeT=10;
+  sfx(ef>1?'hit2':'hit');
+  def.hp=Math.max(0,def.hp-dmg);
+  yield wait(clamp(fl(dmg/Math.max(1,maxHP(def))*60)+12,14,52));
+  if(crit)yield say('A critical hit!');
+  if(ef>1)yield say("It's super effective!");
+  if(ef<1)yield say("It's not very effective...");
+  if(mv.drain&&att.hp>0){const h=Math.max(1,fl(dmg/2));att.hp=Math.min(maxHP(att),att.hp+h);
+   yield say(an+' drained the wound!')}
+  if(mv.rec){att.hp=Math.max(0,att.hp-Math.max(1,fl(dmg/4)));yield say(an+' is hurt by recoil!')}
+  if(def.hp>0){
+   if(mv.brn&&!def.st&&!SP[def.id].t.includes('EMBER')&&ri(100)<mv.brn){def.st='BRN';yield say(dn+' was burned!')}
+   else if(mv.psn&&!def.st&&!SP[def.id].t.includes('ALLOY')&&ri(100)<mv.psn){def.st='PSN';yield say(dn+' was poisoned!')}
+   else if(mv.par&&!def.st&&ri(100)<mv.par){def.st='PAR';yield say(dn+' is numbed! It may not move!')}
+   if(mv.stat&&mv.stat.who==='foe'&&(mv.stat.c?ri(100)<mv.stat.c:false)){
+    yield* statChange(B,def,dS,dn,mv.stat)}}
+  return}
+ // pure status moves
+ if(mv.st){const tgt=def,tn=dn;
+  if(tgt.st){yield say('But it failed!');return}
+  if(mv.st==='PSN'&&SP[tgt.id].t.includes('ALLOY')){yield say("It doesn't affect "+tn+'...');return}
+  if(mv.st==='SLP'){tgt.st='SLP';tgt.slp=2+ri(3);yield say(tn+' fell asleep!')}
+  else if(mv.st==='PAR'){tgt.st='PAR';yield say(tn+' is numbed! It may not move!')}
+  else if(mv.st==='PSN'){tgt.st='PSN';yield say(tn+' was poisoned!')}
+  return}
+ if(mv.stat){const self=mv.stat.who==='self';
+  const tgt=self?att:def,tS=self?aS:dS,tn=self?an:dn;
+  yield* statChange(B,tgt,tS,tn,mv.stat)}}
+function* statChange(B,tgt,S,tn,st){const cur=S[st.s];
+ const nv=clamp(cur+st.d,-6,6);
+ if(nv===cur){yield say(tn+"'s "+STATN[st.s]+" won't go "+(st.d>0?'higher':'lower')+'!');return}
+ S[st.s]=nv;sfx(st.d>0?'conf':'deny');
+ yield say(tn+"'s "+STATN[st.s]+(st.d>1?' rose sharply!':st.d===1?' rose!':st.d<-1?' fell sharply!':' fell!'))}
+function* handleFaints(B){const P=()=>G.party[B.pIdx];
+ if(B.e.hp<=0){sfx('faint');B.flashE=0;
+  yield bAnim(B,14,f=>{B.eDrop=f*3});B.hideE=1;
+  yield say((B.kind==='wild'?'The wild ':'Foe ')+SP[B.e.id].n+' fainted!');
+  if(B.roamer){yield doT(()=>{G.roamer.beat=1});
+   yield say('The legend sinks into the gloam...')}
+  yield* giveExp(B);
+  if(B.kind==='tr'&&B.eIdx<B.eTeam.length-1){yield* enemySend(B,B.eIdx+1)}
+  else{sfx('victory');
+   if(B.kind==='tr'){let pay=B.t.m||100;
+    if(P()&&P().item==='coincharm')pay=fl(pay*1.5);
+    yield doT(()=>{G.money+=pay;for(const m of G.party)m.fr=Math.min(255,m.fr+2)});
+    yield say(G.name+' defeated '+B.t.name+'!','Got $'+pay+' for winning!')}
+   return 'win'}}
+ if(P().hp<=0){sfx('faint');
+  yield bAnim(B,14,f=>{B.pDrop=f*4});B.hideP=1;
+  yield doT(()=>{P().fr=Math.max(0,P().fr-3)});
+  yield say(SP[P().id].n+' fainted!');
+  if(firstAlive()<0)return 'loss';
+  const i=yield {k:'party',pick:1,battle:1,forced:1,cur:B.pIdx,title:'SEND OUT WHICH KIN?'};
+  yield* doSwitch(B,i,true)}
+ return null}
+function* endTurn(B){const list=[['e',B.e],['p',G.party[B.pIdx]]];
+ for(const [side,m] of list){if(!m||m.hp<=0)continue;
+  const n=(side==='p'?'':'Foe ')+SP[m.id].n;
+  if(m.st==='PSN'||m.st==='BRN'){const d=Math.max(1,fl(maxHP(m)/8));m.hp=Math.max(0,m.hp-d);
+   if(side==='p')B.flashP=10;else B.flashE=10;
+   yield say(n+' is hurt by its '+(m.st==='PSN'?'poison!':'burn!'));
+   yield wait(16)}
+  if(m.hp>0&&m.item==='juneberry'&&m.hp<=fl(maxHP(m)/3)){m.hp=Math.min(maxHP(m),m.hp+12);m.item=0;
+   yield say(n+' ate its JUNEBERRY!')}
+  if(m.st&&m.item==='bitterroot'){m.st=0;m.slp=0;m.item=0;
+   yield say(n+"'s BITTERROOT cured it!")}}
+ return yield* handleFaints(B)}
+function* giveExp(B){const e=B.e;
+ const ps=[...B.parts].filter(i=>G.party[i]&&G.party[i].hp>0);
+ if(!ps.length)return;
+ const base=Math.max(1,fl(SP[e.id].xy*e.lv/7));
+ const share=Math.max(1,fl(base/ps.length*(B.kind==='tr'?1.5:1)));
+ for(const i of ps){const m=G.party[i];if(m.lv>=100)continue;
+  yield say(SP[m.id].n+' gained '+share+' EXP!');
+  m.exp+=share;
+  while(m.lv<100&&m.exp>=expFor(m.lv+1)){
+   const om=maxHP(m);m.lv++;m.hp+=maxHP(m)-om;m.fr=Math.min(255,m.fr+3);
+   sfx('lvl');if(i===B.pIdx)B.pShown=m.hp;
+   yield say(SP[m.id].n+' grew to level '+m.lv+'!');
+   for(const lm of SP[m.id].mv){if(lm[0]!==m.lv)continue;const mid=lm[1];
+    if(m.mv.some(s2=>s2.id===mid))continue;
+    if(m.mv.length<4){m.mv.push({id:mid,pp:MV[mid].pp});sfx('found');
+     yield say(SP[m.id].n+' learned '+MV[mid].n+'!')}
+    else{yield say(SP[m.id].n+' wants to learn '+MV[mid].n+'!','But it already knows 4 moves!');
+     const c=yield ask(['Forget an old move?'],['YES','NO'],1);
+     let done=false;
+     if(c===0){const fi=yield {k:'forget',mon:m,mv:mid};
+      if(fi>=0){const old=MV[m.mv[fi].id].n;m.mv[fi]={id:mid,pp:MV[mid].pp};done=true;
+       yield say('1, 2 and... poof!',SP[m.id].n+' forgot '+old+'...','And learned '+MV[mid].n+'!')}}
+     if(!done)yield say(SP[m.id].n+' did not learn '+MV[mid].n+'.')}}
+   queueEvo(i)}}}
+function* throwBall(B,id){remItem(id);
+ yield say(G.name+' threw a '+IT[id].n+'!');sfx('throw');
+ yield bAnim(B,20,f=>{const t2=f/20;B.ball={x:fl(20+t2*92),y:fl(80-Math.sin(t2*Math.PI)*62)}});
+ B.ball={x:112,y:30};B.hideE=1;sfx('click');
+ const e=B.e,M=maxHP(e);
+ let a=fl(fl(3*M-2*e.hp)*SP[e.id].cr*IT[id].m/(3*M));
+ a=fl(a*(e.st==='SLP'?2:e.st?1.5:1));a=clamp(a,1,255);
+ const bb=fl(255*Math.pow(a/255,0.25));
+ let sh=0;for(let i=0;i<4;i++){if(ri(256)<bb)sh++;else break}
+ const caught=sh>=4;
+ for(let i=0;i<Math.min(sh,3);i++){yield wait(18);sfx('shake');
+  yield bAnim(B,22,f=>{B.wob=fl(3*Math.sin(f/2.6))});B.wob=0}
+ yield wait(14);
+ if(!caught){B.hideE=0;B.ball=null;sfx('deny');
+  yield say(['Oh no! It broke free!','Argh! Almost had it!','Shoot! So close!'][Math.min(sh,2)]);
+  return null}
+ sfx('click');yield wait(18);sfx('catch');
+ const isNew=!G.caught[e.id];
+ yield say('Gotcha! '+SP[e.id].n+' was snared!');
+ yield doT(()=>{addCaught(e.id);if(B.roamer)G.roamer.caught=1});
+ if(isNew)yield say(SP[e.id].n+"'s data hums into the KINDEX!");
+ if(G.party.length<6)yield doT(()=>G.party.push(e));
+ else{yield doT(()=>G.vault.push(e));yield say('It was beamed to the VAULT.')}
+ return 'caught'}
+//---- battle menus
+function BMenuMode(B,cb){let sel=0;const its=['FIGHT','BAG','KIN','RUN'];
+ return {tr:true,
+ u(){if(kp('l')||kp('r')){sel^=1;sfx('blip')}
+  if(kp('u')||kp('d')){sel^=2;sfx('blip')}
+  if(kp('a')){sfx('conf');remM(this);cb(sel)}},
+ d(){panel(64,104,96,40);
+  for(let i=0;i<4;i++){const x=72+(i%2)*46,y=112+fl(i/2)*16;
+   drawText(its[i],x+8,y);if(i===sel)drawText('>',x,y)}
+  panel(0,104,64,40);drawText('WHAT',8,112);drawText('WILL',8,122);drawText(SP[G.party[B.pIdx].id].n.slice(0,8)+' DO?',4,132)}}}
+function BMoveMode(B,cb){let sel=0;const m=G.party[B.pIdx];
+ return {tr:true,
+ u(){if(kp('u')){sel=(sel+m.mv.length-1)%m.mv.length;sfx('blip')}
+  if(kp('d')){sel=(sel+1)%m.mv.length;sfx('blip')}
+  if(kp('b')){sfx('blip');remM(this);cb(-1)}
+  if(kp('a')){sfx('conf');remM(this);cb(sel)}},
+ d(){panel(0,104,160,40);
+  for(let i=0;i<m.mv.length;i++){const s=m.mv[i];
+   drawText(MV[s.id].n.slice(0,13),16,109+i*8+(i>1?1:0));
+   if(i===sel)drawText('>',8,109+i*8+(i>1?1:0))}
+  const s=m.mv[sel];panel(108,104,52,40);
+  drawText(MV[s.id].t.slice(0,7),112,110,TYPECOL[MV[s.id].t]);
+  drawText('PP',112,122);drawText(s.pp+'/'+MV[s.id].pp,112,131)}}}
+//------------------------------------------------------------ pause menu & screens
+function PauseMode(){let sel=0;const its=['KINDEX','PARTY','BAG','SAVE','OPTIONS','EXIT'];
+ return {tr:true,
+ u(){if(kp('u')){sel=(sel+5)%6;sfx('blip')}
+  if(kp('d')){sel=(sel+1)%6;sfx('blip')}
+  if(kp('b')||kp('st')){sfx('blip');remM(this);return}
+  if(kp('a')){sfx('conf');
+   if(sel===0)pushM(DexMode());
+   else if(sel===1)pushM(PartyMode({},()=>{}));
+   else if(sel===2)pushM(BagMode({},()=>{}));
+   else if(sel===3){runScript(function*(){
+    if(doSave()){yield say(G.name+' saved the journey!');
+     const i=yield ask(['Copy a backup save code too?'],['YES','NO'],1);
+     if(i===0)showIO('export')}
+    else yield say('Could not save here!','Use OPTIONS > SAVE CODE for a backup code instead.')})}
+   else if(sel===4)pushM(OptionsMode());
+   else remM(this)}},
+ d(){const w=72,x=W-w-2;panel(x,2,w,6*13+10);
+  for(let i=0;i<6;i++){drawText(its[i],x+14,8+i*13);if(i===sel)drawText('>',x+5,8+i*13)}
+  panel(2,2,80,24);drawText('$'+G.money,7,6);
+  drawText(clockStr()+' '+({m:'MORN',d:'DAY',n:'NIGHT'}[phase()]),7,15)}}}
+function PartyMode(t,cb){t=t||{};let sel=0,sub=-1,swap=-1;
+ return {tr:false,
+ u(){const n=G.party.length;
+  if(sub>=0){
+   if(kp('u')){sub=(sub+3)%4;sfx('blip')}
+   if(kp('d')){sub=(sub+1)%4;sfx('blip')}
+   if(kp('b')){sub=-1;sfx('blip');return}
+   if(kp('a')){sfx('conf');const m=G.party[sel];
+    if(sub===0)pushM(SummaryMode(sel));
+    else if(sub===1){swap=sel;sub=-1}
+    else if(sub===2){sub=-1;runScript(function*(){
+     const i=yield ask([SP[m.id].n+(m.item?' holds '+IT[m.item].n+'.':' holds nothing.')],['GIVE','TAKE','BACK'],2);
+     if(i===0){const id=yield {k:'bag',give:1};
+      if(id){if(m.item){addItem(m.item,1);yield say('Took back the '+IT[m.item].n+' first.')}
+       yield doT(()=>{m.item=id;remItem(id,1)});
+       yield say(SP[m.id].n+' now holds the '+IT[id].n+'!')}}
+     else if(i===1){if(m.item){addItem(m.item,1);
+       yield say('Took the '+IT[m.item].n+' from '+SP[m.id].n+'.');m.item=0}
+      else yield say('It holds nothing.')}})}
+    else sub=-1}
+   return}
+  if(kp('u')&&n){sel=(sel+n-1)%n;sfx('blip')}
+  if(kp('d')&&n){sel=(sel+1)%n;sfx('blip')}
+  if(kp('b')){if(t.forced){sfx('deny');return}
+   sfx('blip');remM(this);cb(t.pick?-1:undefined);return}
+  if(kp('a')&&n){
+   if(swap>=0){if(swap!==sel){const a=G.party[swap];G.party[swap]=G.party[sel];G.party[sel]=a;sfx('conf')}
+    swap=-1;return}
+   if(t.pick){const m=G.party[sel];
+    if(t.battle&&(m.hp<=0||t.cur===sel)){sfx('deny');return}
+    sfx('conf');remM(this);cb(sel);return}
+   sfx('conf');sub=0}},
+ d(){ctx.fillStyle='#d8e8d0';ctx.fillRect(0,0,W,H);
+  drawText(t.title||'YOUR KIN',6,4);
+  for(let i=0;i<6;i++){const m=G.party[i];const y=14+i*21;
+   panel(4,y,152,20);
+   if(!m){drawText('-',12,y+7,'#a0a8a0');continue}
+   ctx.drawImage(monSpr(m.id,m.gleam),0,0,16,16,8,y+2,16,16);
+   drawText(SP[m.id].n.slice(0,10)+(m.gleam?'*':''),28,y+3);
+   drawText('L'+m.lv,102,y+3);
+   hpbar(28,y+13,56,m.hp,maxHP(m));
+   drawText(m.hp+'/'+maxHP(m),88,y+12);
+   if(m.hp<=0)drawText('KO',130,y+3,'#c03030');
+   else if(m.st)drawText(m.st,130,y+3,STCOL[m.st]);
+   if(i===sel)frame(4,y,152,20,'#c03030');
+   if(i===swap)drawText('<>',136,y+12,'#3050c0')}
+  if(sub>=0){const its=['STATS','SWITCH','ITEM','BACK'];const x=98,y=86;
+   panel(x,y,58,4*12+9);
+   for(let i=0;i<4;i++){drawText(its[i],x+12,y+5+i*12);if(i===sub)drawText('>',x+4,y+5+i*12)}}}}}
+function SummaryMode(i){const m=G.party[i];
+ return {tr:false,
+ u(){if(kp('b')||kp('a')){sfx('blip');remM(this)}},
+ d(){ctx.fillStyle='#e8e0d0';ctx.fillRect(0,0,W,H);
+  panel(2,2,156,52);
+  ctx.drawImage(monSpr(m.id,m.gleam),0,0,16,16,8,8,40,40);
+  drawText(SP[m.id].n+(m.gleam?' *':''),54,8);
+  let tx=54;for(const ty of SP[m.id].t){tx=drawText(ty,tx,19,TYPECOL[ty])+5}
+  drawText('L'+m.lv,134,8);
+  hpbar(54,31,72,m.hp,maxHP(m));
+  drawText(m.hp+'/'+maxHP(m)+(m.st?'  '+m.st:m.hp<=0?'  KO':''),54,36);
+  drawText(frHearts(m)>0?'@'.repeat(frHearts(m)):'...',54,45,'#d04060');
+  panel(2,56,78,58);
+  drawText('ATTACK  '+stat(m,'at'),7,62);
+  drawText('DEFENSE '+stat(m,'df'),7,74);
+  drawText('SPIRIT  '+stat(m,'sc'),7,86);
+  drawText('SPEED   '+stat(m,'sp'),7,98);
+  panel(82,56,76,58);
+  for(let j=0;j<4;j++){const s=m.mv[j],y=62+j*13;
+   if(!s){drawText('-',88,y,'#a8a8a0');continue}
+   drawText(MV[s.id].n.slice(0,9),88,y);
+   drawText(''+s.pp,144,y,'#506050')}
+  panel(2,116,156,26);
+  drawText('HOLDS: '+(m.item?IT[m.item].n:'NOTHING'),8,120);
+  drawText('NEXT LV: '+Math.max(0,expFor(m.lv+1)-m.exp)+' EXP',8,131)}}}
+function BagMode(t,cb){t=t||{};let sel=0,top=0;
+ const usableBattle=id=>['ball','heal','cure','rev'].includes(IT[id].k);
+ return {tr:false,
+ u(){const L=bagList();if(sel>=L.length)sel=Math.max(0,L.length-1);
+  if(kp('u')&&L.length){sel=(sel+L.length-1)%L.length;sfx('blip')}
+  if(kp('d')&&L.length){sel=(sel+1)%L.length;sfx('blip')}
+  if(sel<top)top=sel;if(sel>top+7)top=sel-7;
+  if(kp('b')){sfx('blip');remM(this);cb(null);return}
+  if(kp('a')&&L.length){const id=L[sel];
+   if(t.battle){if(!usableBattle(id)){sfx('deny');return}
+    sfx('conf');remM(this);cb(id);return}
+   if(t.give){if(IT[id].k==='ball'){sfx('deny');return}
+    sfx('conf');remM(this);cb(id);return}
+   sfx('conf');
+   runScript(function*(){const k=IT[id].k;
+    const ci=yield ask([IT[id].n+': '+IT[id].d],['USE','TOSS','BACK'],2);
+    if(ci===1){const i2=yield ask(['Toss one '+IT[id].n+'?'],['YES','NO'],1);
+     if(i2===0){remItem(id,1);yield say('Tossed one '+IT[id].n+'.')}
+     return}
+    if(ci!==0)return;
+    if(k==='ball'){yield say("Can't use that now.");return}
+    if(k==='held'){yield say('Give it to a KIN to hold:','PARTY > pick a KIN > ITEM > GIVE.');return}
+    const pi=yield {k:'party',pick:1,title:'USE ON WHICH KIN?'};
+    if(pi<0)return;
+    const m=G.party[pi];
+    if(k==='evo'){const ev=SP[m.id].ev;
+     if(ev&&ev.item===id){remItem(id,1);
+      yield say('The '+IT[id].n+' hums and glows!');
+      EVOQ.push({pi,from:m.id,to:ev.to});
+      yield* doEvos()}
+     else yield say('It had no effect on '+SP[m.id].n+'.');
+     return}
+    if(!canUseItem(m,id)){yield say("It won't have any effect.");return}
+    sfx('heal');yield say(useItemOn(m,id))})}},
+ d(){ctx.fillStyle='#e0d8c8';ctx.fillRect(0,0,W,H);
+  drawText('BAG'+(t.battle?'  (BATTLE)':t.give?'  (GIVE)':''),6,4);
+  const L=bagList();panel(2,12,156,8*13+8);
+  if(!L.length)drawText('EMPTY',12,20,'#988878');
+  for(let r=0;r<8;r++){const i=top+r;if(i>=L.length)break;const id=L[i];
+   drawText(IT[id].n.slice(0,14),16,17+r*13);
+   drawText('X'+G.bag[id],126,17+r*13);
+   if(i===sel)drawText('>',7,17+r*13)}
+  panel(2,122,156,20);
+  if(L.length){const ls=wrap(IT[L[sel]].d,25);
+   drawText(ls[0]||'',7,125);drawText(ls[1]||'',7,133)}}}}
+function ShopMode(t,cb){const buy=t.mode!=='sell';
+ let sel=0,top=0,qty=0;
+ const items=()=>buy?t.stock:bagList().filter(id=>IT[id].k!=='evo');
+ const price=id=>buy?IT[id].pr:fl(IT[id].pr/2);
+ return {tr:false,
+ u(){const L=items();if(sel>=L.length)sel=Math.max(0,L.length-1);
+  if(qty>0){const id=L[sel],mxq=buy?99:G.bag[id];
+   if(kp('l')){qty=Math.max(1,qty-1);sfx('blip')}
+   if(kp('r')){qty=Math.min(mxq,qty+1);sfx('blip')}
+   if(kp('u')){qty=Math.min(mxq,qty+10);sfx('blip')}
+   if(kp('d')){qty=Math.max(1,qty-10);sfx('blip')}
+   if(kp('b')){qty=0;sfx('blip');return}
+   if(kp('a')){const cost=price(id)*qty;
+    if(buy){if(G.money<cost){sfx('deny');return}
+     G.money-=cost;addItem(id,qty);sfx('catch')}
+    else{remItem(id,qty);G.money+=cost;sfx('catch')}
+    qty=0}
+   return}
+  if(kp('u')&&L.length){sel=(sel+L.length-1)%L.length;sfx('blip')}
+  if(kp('d')&&L.length){sel=(sel+1)%L.length;sfx('blip')}
+  if(sel<top)top=sel;if(sel>top+7)top=sel-7;
+  if(kp('b')){sfx('blip');remM(this);cb();return}
+  if(kp('a')&&L.length){qty=1;sfx('conf')}},
+ d(){ctx.fillStyle='#e8e8d8';ctx.fillRect(0,0,W,H);
+  panel(2,2,76,15);drawText('$'+G.money,8,6);
+  drawText(buy?'BUYING':'SELLING',110,6);
+  const L=items();panel(2,20,156,8*13+8);
+  if(!L.length)drawText('NOTHING HERE',12,28,'#988878');
+  for(let r=0;r<8;r++){const i=top+r;if(i>=L.length)break;const id=L[i];
+   drawText(IT[id].n.slice(0,12),16,25+r*13);
+   drawText('$'+price(id),96,25+r*13);
+   if(!buy)drawText('X'+G.bag[id],134,25+r*13);
+   if(i===sel)drawText('>',7,25+r*13)}
+  if(qty>0&&L.length){const id=L[sel];panel(30,112,128,28);
+   drawText('X'+qty+' = $'+(price(id)*qty),40,118);
+   drawText('</>:QTY A:OK B:NO',40,128)}}}}
+function VaultMode(cb){let col=0;const sel=[0,0];let top=0;
+ return {tr:false,
+ u(){const Ls=[G.party,G.vault],L=Ls[col];
+  if(sel[col]>=L.length)sel[col]=Math.max(0,L.length-1);
+  if(kp('l')){col=0;sfx('blip')}
+  if(kp('r')){col=1;sfx('blip')}
+  if(kp('u')&&L.length){sel[col]=(sel[col]+L.length-1)%L.length;sfx('blip')}
+  if(kp('d')&&L.length){sel[col]=(sel[col]+1)%L.length;sfx('blip')}
+  if(sel[1]<top)top=sel[1];if(sel[1]>top+5)top=sel[1]-5;
+  if(kp('b')){sfx('blip');remM(this);cb();return}
+  if(kp('a')&&L.length){
+   if(col===0){if(G.party.length<=1){sfx('deny');return}
+    G.vault.push(G.party.splice(sel[0],1)[0]);sfx('conf')}
+   else{if(G.party.length>=6){sfx('deny');return}
+    G.party.push(G.vault.splice(sel[1],1)[0]);sfx('conf')}}},
+ d(){ctx.fillStyle='#d0d8e8';ctx.fillRect(0,0,W,H);
+  drawText('KIN VAULT   A:MOVE B:DONE',6,3);
+  panel(2,13,76,129);drawText('PARTY',10,17,col===0?'#c03030':'#404048');
+  for(let i=0;i<G.party.length;i++){const m=G.party[i];
+   drawText(SP[m.id].n.slice(0,8),16,29+i*18);
+   drawText('L'+m.lv,16,38+i*18,'#606870');
+   if(col===0&&i===sel[0])drawText('>',7,29+i*18)}
+  panel(82,13,76,129);drawText('VAULT '+G.vault.length,90,17,col===1?'#c03030':'#404048');
+  for(let r=0;r<6;r++){const i=top+r;if(i>=G.vault.length)break;const m=G.vault[i];
+   drawText(SP[m.id].n.slice(0,8),96,29+r*18);
+   drawText('L'+m.lv,96,38+r*18,'#606870');
+   if(col===1&&i===sel[1])drawText('>',87,29+r*18)}}}}
+function NameMode(cb){let name='',cx2=0,cy2=0;
+ const cell=(x,y)=>{const i=y*7+x;return i<26?String.fromCharCode(65+i):i===26?'DEL':'END'};
+ return {tr:false,
+ u(){if(kp('l')){cx2=(cx2+6)%7;sfx('blip')}
+  if(kp('r')){cx2=(cx2+1)%7;sfx('blip')}
+  if(kp('u')){cy2=(cy2+3)%4;sfx('blip')}
+  if(kp('d')){cy2=(cy2+1)%4;sfx('blip')}
+  if(kp('b')){name=name.slice(0,-1);sfx('blip')}
+  if(kp('st')){if(name.length){sfx('conf');remM(this);cb(name)}return}
+  if(kp('a')){const c=cell(cx2,cy2);
+   if(c==='DEL'){name=name.slice(0,-1);sfx('blip')}
+   else if(c==='END'){if(name.length){sfx('conf');remM(this);cb(name)}else sfx('deny')}
+   else if(name.length<7){name+=c;sfx('blip')}
+   else sfx('deny')}},
+ d(){ctx.fillStyle='#283038';ctx.fillRect(0,0,W,H);
+  drawText('YOUR NAME?',8,6,'#e8e8d8');
+  panel(8,18,144,17);drawText(name+(fl(Date.now()/300)%2?'_':''),16,23);
+  panel(8,42,144,86);
+  for(let y=0;y<4;y++)for(let x=0;x<7;x++){const c=cell(x,y);
+   const px=20+x*19,py=50+y*19;
+   drawText(c,px,py);
+   if(x===cx2&&y===cy2)frame(px-4,py-4,c.length*6+7,14,'#c03030')}
+  drawText('A:PICK B:DEL START:DONE',10,133,'#aab0c0')}}}
+function ForgetMode(mon,mid,cb){let sel=0;
+ return {tr:true,
+ u(){if(kp('u')){sel=(sel+4)%5;sfx('blip')}
+  if(kp('d')){sel=(sel+1)%5;sfx('blip')}
+  if(kp('b')){sfx('blip');remM(this);cb(-1);return}
+  if(kp('a')){sfx('conf');remM(this);cb(sel<4?sel:-1)}},
+ d(){panel(24,18,112,98);
+  drawText('FORGET WHICH MOVE?',32,24);
+  for(let i=0;i<4;i++){drawText(MV[mon.mv[i].id].n.slice(0,13),46,38+i*13);
+   if(sel===i)drawText('>',36,38+i*13)}
+  drawText('GIVE UP',46,38+52);if(sel===4)drawText('>',36,90);
+  drawText('NEW: '+MV[mid].n.slice(0,12),32,104,'#3050b0')}}}
+function EvoMode(mon,to,cb){let f=0;
+ return {tr:false,
+ u(){if(f<280&&kp('b')){remM(this);cb('cancel');return}
+  f++;
+  if(f===280)sfx('evo');
+  if(f>=336){remM(this);cb('done')}},
+ d(){ctx.fillStyle='#101428';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#1c2444';ctx.fillRect(0,40,W,64);
+  for(let i=0;i<10;i++){ctx.fillStyle='#303c64';ctx.fillRect((i*53+fl(f/3)*7)%160,(i*31)%140,1,1)}
+  const per=Math.max(3,fl(42-f/8));
+  const id=(f>=280||fl(f/per)%2===1)?to:mon.id;
+  ctx.drawImage(monSpr(id,mon.gleam),0,0,16,16,56,46,48,48);
+  if(f<280)drawText('B: STOP',62,124,'#8890b0');
+  if(f>=280&&f<330){ctx.fillStyle='rgba(255,255,240,'+Math.max(0,(1-(f-280)/44)).toFixed(2)+')';ctx.fillRect(0,0,W,H)}}}}
+function DexMode(){let sel=0,top=0;
+ return {tr:false,
+ u(){if(kp('u')){sel=(sel+DEXN-1)%DEXN;sfx('blip')}
+  if(kp('d')){sel=(sel+1)%DEXN;sfx('blip')}
+  if(sel<top)top=sel;if(sel>top+8)top=sel-8;
+  if(kp('b')){sfx('blip');remM(this);return}
+  if(kp('a')){const id=sel+1;
+   if(G.seen[id]){sfx('conf');pushM(DexEntryMode(id))}else sfx('deny')}},
+ d(){ctx.fillStyle='#c83838';ctx.fillRect(0,0,W,13);
+  ctx.fillStyle='#e8e0d0';ctx.fillRect(0,13,W,H-13);
+  drawText('KINDEX SEEN:'+Object.keys(G.seen).length+' SNARED:'+Object.keys(G.caught).length,4,3,'#f8f0e0');
+  for(let r=0;r<9;r++){const i=top+r;if(i>=DEXN)break;
+   const id=i+1,y=17+r*14;
+   drawText(('00'+id).slice(-2),16,y);
+   drawText(G.seen[id]?SP[id].n:'?????',36,y,G.seen[id]?'#282828':'#a09888');
+   if(G.caught[id])drawText('*',110,y,'#c03030');
+   if(i===sel)drawText('>',7,y)}}}}
+function DexEntryMode(id){return {tr:false,
+ u(){if(kp('a')||kp('b')){sfx('blip');remM(this)}},
+ d(){ctx.fillStyle='#e8e0d0';ctx.fillRect(0,0,W,H);
+  panel(2,2,156,58);
+  ctx.drawImage(monSpr(id,0),0,0,16,16,10,10,44,44);
+  drawText(('00'+id).slice(-2)+' '+SP[id].n,62,10);
+  let tx=62;for(const t of SP[id].t)tx=drawText(t,tx,22,TYPECOL[t])+6;
+  drawText(G.caught[id]?'SNARED *':'SEEN ONLY',62,36,G.caught[id]?'#c03030':'#807868');
+  panel(2,62,156,52);
+  const ls=wrap(G.caught[id]?SP[id].dex:'Snare one to record its full entry.',25);
+  for(let i=0;i<ls.length&&i<3;i++)drawText(ls[i],8,68+i*12);
+  drawText('A/B: BACK',8,130,'#807868')}}}
+function OptionsMode(){let sel=0;
+ const rows=['TEXT SPEED','MUSIC','SOUND FX','SET CLOCK','SAVE CODE','IMPORT CODE','BACK'];
+ return {tr:false,
+ u(){if(kp('u')){sel=(sel+rows.length-1)%rows.length;sfx('blip')}
+  if(kp('d')){sel=(sel+1)%rows.length;sfx('blip')}
+  const adj=dd=>{sfx('blip');
+   if(sel===0)G.opts.txt=clamp(G.opts.txt+dd,0,2);
+   else if(sel===1)G.opts.mus=G.opts.mus?0:1;
+   else if(sel===2)G.opts.sfx=G.opts.sfx?0:1;
+   else if(sel===3)G.time=(((fl(G.time/60)+dd+24)%24))*60};
+  if(kp('l'))adj(-1);
+  if(kp('r'))adj(1);
+  if(kp('b')){sfx('blip');remM(this);return}
+  if(kp('a')){if(sel===4)showIO('export');
+   else if(sel===5)showIO('import');
+   else if(sel===6){sfx('blip');remM(this)}
+   else adj(1)}},
+ d(){ctx.fillStyle='#d8dce0';ctx.fillRect(0,0,W,H);
+  drawText('OPTIONS',6,4);
+  const vals=[['SLOW','MID','FAST'][G.opts.txt],G.opts.mus?'ON':'OFF',G.opts.sfx?'ON':'OFF',
+   ('0'+(fl(G.time/60)%24)).slice(-2)+':00 '+({m:'MORN',d:'DAY',n:'NIGHT'}[phase()]),'>','>',''];
+  for(let i=0;i<rows.length;i++){const y=18+i*15;
+   drawText(rows[i],18,y);drawText(vals[i],96,y);
+   if(i===sel)drawText('>',8,y)}
+  drawText('</> CHANGE   B: BACK',8,130,'#506070')}}}
+//------------------------------------------------------------ save-code overlay (DOM)
+let IOEL=null;
+function setupIO(){if(typeof document==='undefined'||!document.getElementById)return;
+ const io=document.getElementById('io');if(!io)return;
+ IOEL={io,ta:document.getElementById('iotext'),load:document.getElementById('ioload'),
+  close:document.getElementById('ioclose'),title:document.getElementById('iotitle')};
+ IOEL.close.onclick=()=>{IOEL.io.style.display='none'};
+ IOEL.load.onclick=()=>{
+  if(importCode(IOEL.ta.value)){IOEL.io.style.display='none';
+   MODES.length=0;pushM(OW);enterMap();
+   runScript(function*(){yield say('Save code loaded!','Welcome back, '+G.name+'.')})}
+  else IOEL.title.textContent='INVALID CODE - check it and try again'}}
+function showIO(mode){if(!IOEL){runScript(function*(){yield say('Save codes need the web page UI.')});return}
+ IOEL.io.style.display='flex';
+ if(mode==='export'){IOEL.title.textContent='SAVE CODE - copy and keep it safe';
+  IOEL.ta.value=exportCode();IOEL.ta.readOnly=true;IOEL.load.style.display='none';
+  IOEL.ta.focus();if(IOEL.ta.select)IOEL.ta.select()}
+ else{IOEL.title.textContent='PASTE A SAVE CODE BELOW';
+  IOEL.ta.value='';IOEL.ta.readOnly=false;IOEL.load.style.display='inline-block';IOEL.ta.focus()}}
+//------------------------------------------------------------ title & intro
+function TitleMode(){let sel=0,f=0;
+ const opts=()=>hasSave()?['CONTINUE','NEW GAME','IMPORT CODE']:['NEW GAME','IMPORT CODE'];
+ return {tr:false,
+ u(){f++;const o=opts();if(sel>=o.length)sel=0;
+  if(kp('u')){sel=(sel+o.length-1)%o.length;sfx('blip')}
+  if(kp('d')){sel=(sel+1)%o.length;sfx('blip')}
+  if(kp('a')||kp('st')){const c=o[sel];sfx('conf');
+   if(c==='CONTINUE'){if(loadSave())startPlay()}
+   else if(c==='NEW GAME'){MODES.length=0;newGame('RIN');pushM(OW);startScript(introScript())}
+   else showIO('import')}},
+ d(){f++;
+  ctx.fillStyle='#101828';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<26;i++){const sx=(i*37)%160,sy=(i*53)%72;
+   ctx.fillStyle=(fl(f/40)+i)%6?'#28324c':'#98a0d0';ctx.fillRect(sx,sy,1,1)}
+  drawTextBig('FAUNWILD',10,18,3,'#502c14');
+  drawTextBig('FAUNWILD',8,16,3,'#f0c850');
+  ctext('AN ORIGINAL KIN ADVENTURE',44,'#98a0c0');
+  ctx.drawImage(monSpr(30,0),0,0,16,16,58,54,44,44);
+  const o=opts();panel(44,99,72,o.length*12+8);
+  for(let i=0;i<o.length;i++){drawText(o[i],58,103+i*12);if(i===sel)drawText('>',48,103+i*12)}
+  ctext('Z:OK X:BACK ENTER:MENU',2,'#5a6488');
+  ctx.globalAlpha=.10+.07*Math.sin(f/80);ctx.fillStyle='#4858b8';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}}}
+function IntroBg(){let f=0;return {tr:false,
+ d(){f++;ctx.fillStyle='#16202c';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<18;i++){ctx.fillStyle='#2a3850';ctx.fillRect((i*43)%160,(i*29)%96,2,2)}
+  ctx.drawImage(npcSpr('prof','d'),0,0,16,16,24,30+fl(Math.sin(f/40)*2),48,48);
+  ctx.drawImage(monSpr(1,0),0,0,16,16,98,40+fl(Math.cos(f/34)*2),40,40)}}}
+function* introScript(){const bg=IntroBg();pushM(bg);
+ yield {k:'fade',dir:'in'};
+ yield say('BRAMBLE: Welcome to the world of KIN!','Wondrous creatures of field, flame and shadow share our roads.','Folk who battle and bond with them are called KEEPERS.','And what a season! TWO new KIN types were just discovered:','ALLOY and UMBRAL! The old type charts are obsolete!');
+ const ci=yield ask(['First things first.','What shall I call you?'],['RIN','KAI','MILO','NOA','OTHER'],0);
+ let nm='RIN';
+ if(ci<4)nm=['RIN','KAI','MILO','NOA'][ci];
+ else nm=(yield {k:'name'})||'RIN';
+ yield doT(()=>{G.name=nm});
+ yield say('BRAMBLE: '+nm+'! A fine KEEPER name.','Come to my LAB in MOSSHOLLOW when you wake.','Your story starts today!');
+ yield {k:'fade',dir:'out'};
+ yield doT(()=>{remM(bg);warpTo('home',4,4,'d')});
+ yield {k:'fade',dir:'in'};
+ yield say('(Visit the LAB with the big blue roof, south side of town!)')}
+function startPlay(){MODES.length=0;pushM(OW);INGAME=true;enterMap();
+ runScript(function*(){yield {k:'fade',dir:'in'}})}
+//------------------------------------------------------------ boot, loop, input
+let ACC=0,LASTT=0;
+function stepGame(){if(INGAME&&G)tickTime();
+ musTick();
+ const t=topM();if(t&&t.u)t.u();
+ for(const k in KEYP)KEYP[k]=0}
+function drawFrame(){if(!ctx)return;
+ let s=0;for(let i=MODES.length-1;i>=0;i--)if(!MODES[i].tr){s=i;break}
+ ctx.fillStyle='#080810';ctx.fillRect(0,0,W,H);
+ for(let i=s;i<MODES.length;i++)if(MODES[i].d)MODES[i].d()}
+function frameLoop(ts){requestAnimationFrame(frameLoop);
+ if(!LASTT)LASTT=ts;let dt=ts-LASTT;LASTT=ts;if(dt>250)dt=250;
+ ACC+=dt;let n=0;
+ while(ACC>=16.667&&n<5){ACC-=16.667;n++;stepGame()}
+ drawFrame()}
+function resize(){if(!cv||typeof innerWidth==='undefined')return;
+ let coarse=false;try{coarse=matchMedia('(pointer:coarse)').matches}catch(e){}
+ const availH=innerHeight-(coarse?186:16);
+ let s=Math.min(fl((innerWidth-8)/W),fl(availH/H));
+ s=clamp(s,2,4);
+ cv.style.width=(W*s)+'px';cv.style.height=(H*s)+'px'}
+function setupInput(){if(typeof addEventListener!=='function')return;
+ const mp={ArrowUp:'u',KeyW:'u',ArrowDown:'d',KeyS:'d',ArrowLeft:'l',KeyA:'l',ArrowRight:'r',KeyD:'r',KeyZ:'a',Space:'a',KeyX:'b',Backspace:'b',Enter:'st'};
+ addEventListener('keydown',e=>{aInit();const k=mp[e.code];if(k){setKey(k,true);e.preventDefault()}});
+ addEventListener('keyup',e=>{const k=mp[e.code];if(k){setKey(k,false);e.preventDefault()}})}
+function setupTouch(){if(typeof document==='undefined'||!document.getElementById)return;
+ const pads=document.getElementById('pads');if(!pads||!pads.querySelectorAll)return;
+ pads.querySelectorAll('[data-k]').forEach(el=>{
+  const k=el.getAttribute('data-k');
+  const dn=e=>{e.preventDefault();aInit();setKey(k,true);el.classList.add('on')};
+  const up=e=>{e.preventDefault();setKey(k,false);el.classList.remove('on')};
+  el.addEventListener('pointerdown',dn);el.addEventListener('pointerup',up);
+  el.addEventListener('pointercancel',up);el.addEventListener('pointerleave',up)})}
+function boot(){buildTiles();
+ if(typeof document!=='undefined'&&document.getElementById)cv=document.getElementById('cv');
+ if(!cv)cv=document.createElement('canvas');
+ cv.width=W;cv.height=H;ctx=cv.getContext('2d');
+ if(ctx)ctx.imageSmoothingEnabled=false;
+ setupInput();setupTouch();setupIO();resize();
+ if(typeof addEventListener==='function')addEventListener('resize',resize);
+ const issues=selfTest();
+ if(issues.length&&typeof console!=='undefined')console.warn('FAUNWILD selftest:',issues);
+ pushM(TitleMode());playSong('over');
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(frameLoop)}
+//------------------------------------------------------------ self test
+function selfTest(){const errs=[];
+ const tileChars='.gf-wTLFSrCDRBPWoxq#_kphenamdHYZuUi^v<>';
+ for(const k in MAPS){const mp=MAPS[k],g=mp.g,w=g[0].length;
+  for(let y=0;y<g.length;y++){if(g[y].length!==w)errs.push(k+' row '+y+' width '+g[y].length+' != '+w);
+   for(const c of g[y])if(tileChars.indexOf(c)<0)errs.push(k+' unknown tile "'+c+'"')}
+  const at=(x,y)=>(y<0||y>=g.length||x<0||x>=w)?'T':g[y][x];
+  for(const wp of mp.warps){
+   if(!MAPS[wp.m]){errs.push(k+' warp to missing map '+wp.m);continue}
+   const tg=MAPS[wp.m].g;
+   if(wp.ty>=tg.length||wp.tx>=tg[0].length){errs.push(k+' warp OOB to '+wp.m);continue}
+   const c=tg[wp.ty][wp.tx];
+   if(SOLID[c]||c==='H')errs.push(k+' warp lands on solid "'+c+'" in '+wp.m)}
+  if(mp.edges)for(const dk in mp.edges)if(!MAPS[mp.edges[dk].m])errs.push(k+' edge to missing map');
+  for(const n of mp.npcs){
+   if(n.y>=g.length||n.x>=w){errs.push(k+' npc out of bounds');continue}
+   if(SOLID[at(n.x,n.y)])errs.push(k+' npc standing on solid "'+at(n.x,n.y)+'" at '+n.x+','+n.y);
+   if(n.tr){const team=n.tr.rival?rivalTeam(n.tr.rival):n.tr.team;
+    for(const e of team)if(!SP[e[0]])errs.push(k+' trainer bad species '+e[0]);
+    if(n.tr.win&&!SCRIPTS[n.tr.win])errs.push(k+' missing win script '+n.tr.win)}
+   if(n.dscript&&!SCRIPTS[n.dscript])errs.push(k+' missing dscript '+n.dscript)}
+  for(const it of mp.items){if(!IT[it.it])errs.push(k+' bad item '+it.it);
+   if(SOLID[at(it.x,it.y)])errs.push(k+' item on solid')}
+  for(const e of (mp.trig||[]).concat(mp.exam||[]))if(!SCRIPTS[e.s])errs.push(k+' missing script '+e.s);
+  if(mp.enc)for(const ph of ['m','d','n'])for(const e of (mp.enc[ph]||[]))if(!SP[e[0]])errs.push(k+' enc bad species '+e[0])}
+ for(let i=1;i<=DEXN;i++){const s=SP[i];
+  const rows=s.px.split('|');
+  if(rows.length!==16)errs.push(s.n+' px has '+rows.length+' rows');
+  for(const r of rows){if(r.length!==8&&r.length!==16)errs.push(s.n+' px row len '+r.length);
+   for(const c of r)if('.12345'.indexOf(c)<0)errs.push(s.n+' bad px char '+c)}
+  for(const e of s.mv)if(!MV[e[1]])errs.push(s.n+' bad move '+e[1]);
+  if(s.ev&&!SP[s.ev.to])errs.push(s.n+' bad evo target');
+  if(s.ev&&s.ev.item&&!IT[s.ev.item])errs.push(s.n+' bad evo item')}
+ for(const gk of ['gym1','gym2','gym3']){const mp=MAPS[gk],g=mp.g,w=g[0].length,h=g.length;
+  const pass=c=>'_YZuUdi^v<>'.indexOf(c)>=0;
+  const st0=mp.warps[0],L=mp.npcs[0];
+  const seen=new Set([st0.x+','+st0.y]);const q=[[st0.x,st0.y]];let ok=false;
+  while(q.length){const [x,y]=q.shift();
+   if(Math.abs(x-L.x)+Math.abs(y-L.y)===1){ok=true;break}
+   for(const dd of [[0,1],[0,-1],[1,0],[-1,0]]){const nx=x+dd[0],ny=y+dd[1];
+    if(nx<0||ny<0||nx>=w||ny>=h)continue;
+    const key=nx+','+ny;if(seen.has(key))continue;seen.add(key);
+    if(pass(g[ny][nx]))q.push([nx,ny])}}
+  if(!ok)errs.push(gk+' leader unreachable')}
+ {const g=MAPS.cave.g;const pass=c=>c==='q'||c==='d';
+  const seen=new Set(['1,8']);const q=[[1,8]];let ok=false;
+  while(q.length){const [x,y]=q.shift();
+   if(x===18&&y===7){ok=true;break}
+   for(const dd of [[0,1],[0,-1],[1,0],[-1,0]]){const nx=x+dd[0],ny=y+dd[1];
+    if(ny<0||ny>=g.length||nx<0||nx>=g[0].length)continue;
+    const key=nx+','+ny;if(seen.has(key))continue;seen.add(key);
+    if(pass(g[ny][nx]))q.push([nx,ny])}}
+  if(!ok)errs.push('cave exits not connected')}
+ return errs}
+//------------------------------------------------------------ headless battle sim (for tests)
+function simBattle(t,policy){policy=policy||{};const B=mkBattle(t);
+ const gen=battleFlow(B);let val;
+ for(let i=0;i<40000;i++){let r;
+  try{r=gen.next(val)}catch(e){return 'ERR:'+(e&&e.stack||e)}
+  val=undefined;
+  if(r.done)return r.value;
+  const tk=r.value||{};
+  switch(tk.k){
+   case 'do':val=tk.fn();break;
+   case 'ask':val=(policy.ask!==undefined)?policy.ask:0;break;
+   case 'push':
+    if(tk.tag==='bmenu')val=policy.menu?policy.menu(B):0;
+    else if(tk.tag==='bmove'){let mi=0;const m=G.party[B.pIdx];
+     for(let j=0;j<m.mv.length;j++)if(m.mv[j].pp>0){mi=j;break}
+     val=mi}
+    else val=0;
+    break;
+   case 'party':{let pi=-1;
+    for(let j=0;j<G.party.length;j++)if(G.party[j].hp>0&&j!==tk.cur){pi=j;break}
+    val=pi;break}
+   case 'bag':val=policy.bag?policy.bag(B):null;break;
+   case 'forget':val=0;break;
+   case 'name':val='TEST';break;
+   default:break}}
+ return 'TIMEOUT'}
+//------------------------------------------------------------ debug handle & boot guard
+const FW={boot,stepGame,drawFrame,newGame,startPlay,makeMon,maxHP,stat,simBattle,selfTest,
+ SP,MV,IT,MAPS,SCRIPTS,OW,warpTo,enterMap,setKey,kp,pushM,remM,topM,MODES,EVOQ,doEvos,
+ runScript,startScript,addItem,exportCode,importCode,loadSave,doSave,TitleMode,mkBattle,battleFlow,effMul,
+ get G(){return G},set G(v){G=v},
+ get INGAME(){return INGAME},set INGAME(v){INGAME=v}};
+if(typeof window!=='undefined'){window.FW=FW;
+ if(!window.__FAUNTEST&&typeof addEventListener==='function')addEventListener('load',()=>boot())}
+
+</script>
+
+<script src="https://telegram.org/js/games.js"></script>
+<script>
+(function(){
+  function calcScore(){
+    try{
+      var g = window.FW && window.FW.G;
+      if(!g) return 0;
+      var score = (g.money|0);
+      score += (g.badges ? g.badges.length : 0) * 1000;
+      score += (g.vault ? g.vault.length : 0) * 40;
+      if(g.party) for(var i=0;i<g.party.length;i++) score += (g.party[i].lv||1) * 25;
+      return Math.max(0, Math.floor(score));
+    }catch(e){ return 0; }
+  }
+  function submitScore(){
+    var score = calcScore();
+    try{
+      if(typeof TelegramGameProxy !== "undefined" && TelegramGameProxy.postEvent){
+        TelegramGameProxy.postEvent("share_score", false, score);
+        return;
+      }
+    }catch(e){}
+    try{
+      var m = (location.hash||"").match(/tgShareScoreUrl=([^&]+)/);
+      if(m){
+        var url = decodeURIComponent(m[1]);
+        location.href = url + (url.indexOf("?")>=0?"&":"?") + "score=" + score;
+        return;
+      }
+    }catch(e){}
+    prompt("Счёт для бота (отправь команду):", "/score " + score);
+  }
+  function mountBtn(){
+    if(document.getElementById("tgScoreBtn")) return;
+    var b = document.createElement("button");
+    b.id = "tgScoreBtn";
+    b.textContent = "Счёт → TG";
+    b.style.cssText = "position:fixed;right:10px;top:10px;z-index:20;padding:8px 12px;border-radius:10px;border:2px solid #3c3c5e;background:#1d1d30;color:#e6c95e;font:bold 12px monospace;cursor:pointer";
+    b.onclick = submitScore;
+    document.body.appendChild(b);
+  }
+  if(document.readyState === "loading") addEventListener("load", mountBtn); else mountBtn();
+})();
+</script>
+</body>
+</html>
